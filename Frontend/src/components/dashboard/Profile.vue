@@ -1,3 +1,18 @@
+<!--
+Copyright (c) 2025 Cg8-5712
+Permission is granted to use, read, and study this code strictly for personal and non-commercial educational purposes only.
+Any reproduction, modification, distribution, or use of this code — in whole or in part — in competitions, contests,
+academic evaluations, commercial activities, or any form of official submissions is strictly prohibited without the
+prior written consent of the author.
+This software is NOT open-source. It is released under a custom license based on CC BY-NC-ND 4.0.
+For licensing inquiries, contact: 5712.cg8@gmail.com.
+My GitHub profile: https://github.com/cg8-5712/
+
+版权所有 (c) 2025 Cg8-5712
+仅允许出于个人学习和非商业教育目的使用、阅读和研究本代码。
+未经作者书面授权，严禁将本代码（包括全部或部分）用于比赛、竞赛、学术评审、商业活动或任何形式的官方成果提交。
+本软件不是开源项目，授权条款基于 CC BY-NC-ND 4.0（https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh）。
+-->
 <template>
   <header class="fixed inset-x-0 top-0 z-50 flex h-16 border-b border-gray-900/10">
     <div class="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
