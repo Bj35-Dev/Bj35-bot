@@ -92,6 +92,7 @@ class PostgreSQLConnector:
             async with cls.pool.acquire() as conn:
                 await conn.execute('''
                     CREATE TABLE IF NOT EXISTS userinfo (
+                        id SERIAL PRIMARY KEY,
                         wecom TEXT,
                         wecom_id TEXT,
                         name TEXT,
