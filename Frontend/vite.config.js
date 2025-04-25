@@ -11,7 +11,8 @@ export default defineConfig(() => {
     ],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src')
+        '@': path.resolve(__dirname, './src'),
+        'vue-cropperjs/dist/vue-cropper.css': path.resolve(__dirname, 'node_modules/vue-cropperjs/node_modules/cropperjs/dist/cropper.css')
       }
     },
   }
