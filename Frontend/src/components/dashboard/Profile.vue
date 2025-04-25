@@ -196,7 +196,6 @@ import { UserCircleIcon, FingerPrintIcon, UsersIcon, XCircleIcon } from '@heroic
 import { useRouter } from 'vue-router'
 import AuthService from '@/services/AuthService.js'
 import VueCropper from 'vue-cropperjs'
-import 'cropperjs/dist/cropper.css'
 import ApiServices from "@/services/ApiServices.js";
 
 const router = useRouter()
