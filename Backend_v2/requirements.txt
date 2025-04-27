@@ -30,7 +30,7 @@ pydantic-settings~=2.9.1
 
 # 数据保存
 PyYAML~=6.0.2
-cryptography~=39.0.1
+cryptography~=44.0.2
 
 # 姓名首字母设置
 pypinyin~=0.54.0
