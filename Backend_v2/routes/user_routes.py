@@ -13,8 +13,8 @@ from services import UserService
 
 from settings import settings
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
 URI_PREFIX = settings.URI_PREFIX
 
 def register_routes(app):

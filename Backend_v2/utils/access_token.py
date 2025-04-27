@@ -25,14 +25,13 @@ import hmac
 import base64
 import time
 import uuid
-import aiohttp
 import logging
+
+import aiohttp
 
 from settings import settings
 from utils.exceptions import UpdateTokenError
 
-# Set up logging
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Function to generate signature asynchronously

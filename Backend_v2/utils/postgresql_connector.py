@@ -20,6 +20,8 @@ from settings import settings
 
 from utils.exceptions import DatabaseConnectionError
 
+logger = logging.getLogger(__name__)
+
 class PostgreSQLConnector:
     """PostgreSQL 数据库连接管理类，提供数据库操作的各种方法。"""
     pool: Optional[asyncpg.Pool] = None
@@ -29,7 +31,7 @@ class PostgreSQLConnector:
     async def initialize(cls) -> None:
         """初始化数据库连接池"""
         if cls.pool:
-            logging.info("数据库连接池已存在，跳过初始化")
+            logger.info("数据库连接池已存在，跳过初始化")
             return
 
         max_retries = 3
@@ -59,20 +61,20 @@ class PostgreSQLConnector:
                 # 创建必要的表
                 await cls.create_table()
 
-                logging.info("PostgreSQL 连接已建立")
+                logger.info("PostgreSQL 连接已建立")
                 return
             except asyncpg.PostgresError as e:
                 retry_count += 1
                 if retry_count >= max_retries:
-                    logging.error("PostgreSQL 连接失败，已重试 %d 次，退出", max_retries)
+                    logger.error("PostgreSQL 连接失败，已重试 %d 次，退出", max_retries)
                     raise DatabaseConnectionError(f"无法连接到 PostgreSQL 数据库: {str(e)}") from e
 
                 wait_time = 2 ** retry_count  # 指数退避策略
-                logging.warning("PostgreSQL 连接失败，正在重试 %d/%d 次，等待 %d 秒: %s",
+                logger.warning("PostgreSQL 连接失败，正在重试 %d/%d 次，等待 %d 秒: %s",
                                 retry_count, max_retries, wait_time, str(e))
                 await asyncio.sleep(wait_time)
             except Exception as e:
-                logging.error("PostgreSQL 初始化失败: %s", str(e))
+                logger.error("PostgreSQL 初始化失败: %s", str(e))
                 raise DatabaseConnectionError(f"无法连接到 PostgreSQL 数据库: {str(e)}") from e
 
     @classmethod
@@ -80,7 +82,7 @@ class PostgreSQLConnector:
         """关闭数据库连接池，释放资源"""
         if cls.pool:
             await cls.pool.close()
-            logging.info("PostgreSQL 连接池已关闭")
+            logger.info("PostgreSQL 连接池已关闭")
 
     @classmethod
     async def create_table(cls) -> None:
@@ -105,9 +107,9 @@ class PostgreSQLConnector:
                         avatar_text TEXT
                     )
                 ''')
-                logging.debug("用户信息表创建成功或已存在")
+                logger.debug("用户信息表创建成功或已存在")
         except Exception as e:
-            logging.error("创建表失败: %s", str(e))
+            logger.error("创建表失败: %s", str(e))
             raise
 
     @classmethod
@@ -121,7 +123,7 @@ class PostgreSQLConnector:
                 async with cls.pool.acquire() as conn:
                     await conn.execute(query, *args)
             except Exception as e:
-                logging.error("SQL执行失败: %s", str(e))
+                logger.error("SQL执行失败: %s", str(e))
                 raise
 
     @classmethod
@@ -136,7 +138,7 @@ class PostgreSQLConnector:
                     row = await conn.fetchrow(query, *args)
                     return dict(row) if row else None
             except Exception as e:
-                logging.error("SQL查询失败: %s", str(e))
+                logger.error("SQL查询失败: %s", str(e))
                 raise
 
     @classmethod
@@ -151,7 +153,7 @@ class PostgreSQLConnector:
                     rows = await conn.fetch(query, *args)
                     return [dict(row) for row in rows]
             except Exception as e:
-                logging.error("SQL查询失败: %s", str(e))
+                logger.error("SQL查询失败: %s", str(e))
                 raise
 
     @classmethod
@@ -165,5 +167,5 @@ class PostgreSQLConnector:
                 async with cls.pool.acquire() as conn:
                     return await conn.fetchval(query, *args)
             except Exception as e:
-                logging.error("SQL查询失败: %s", str(e))
+                logger.error("SQL查询失败: %s", str(e))
                 raise

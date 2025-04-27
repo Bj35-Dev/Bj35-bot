@@ -9,6 +9,8 @@ from urllib.parse import quote
 import aiohttp
 from settings import settings
 
+logger = logging.getLogger(__name__)
+
 class WeComOAuth:
     """企业微信 OAuth 认证处理类"""
 
@@ -44,7 +46,7 @@ class WeComOAuth:
     async def get_user_info(cls, code: str, state: str):
         """通过授权码获取用户信息"""
         if state not in cls.state:
-            logging.error("State mismatch")
+            logger.error("State mismatch")
             return None
         cls.state.remove(state)
 
@@ -52,14 +54,14 @@ class WeComOAuth:
             # 1. 获取访问令牌
             access_token = await cls.get_access_token()
             if not access_token:
-                logging.error("Failed to get access token")
+                logger.error("Failed to get access token")
                 return None
 
             # 2. 使用授权码获取用户身份
             user_info = await cls.get_user_id(access_token, code)
             if not user_info or user_info.get('userid') is None:
                 # 判断非企业成员 / 接口错误
-                logging.error("Failed to get user ID")
+                logger.error("Failed to get user ID")
                 return None
 
             # 3. 获取用户基本信息
@@ -77,7 +79,7 @@ class WeComOAuth:
             return user_detail
 
         except Exception as e:
-            logging.error("Error getting user info: %s", e)
+            logger.error("Error getting user info: %s", e)
             return None
 
     @classmethod
@@ -95,10 +97,10 @@ class WeComOAuth:
 
             if data.get('errcode') == 0:
                 return data.get('access_token')
-            logging.error("Failed to get access token: %s", data)
+            logger.error("Failed to get access token: %s", data)
             return None
         except Exception as e:
-            logging.error("Error getting access token: %s", e)
+            logger.error("Error getting access token: %s", e)
             return None
 
     @classmethod
@@ -116,10 +118,10 @@ class WeComOAuth:
                     'userid': data.get('userid'),
                     'user_ticket': data.get('user_ticket')
                 }
-            logging.error("Failed to get user ID: %s", data)
+            logger.error("Failed to get user ID: %s", data)
             return None
         except Exception as e:
-            logging.error("Error getting user ID: %s", e)
+            logger.error("Error getting user ID: %s", e)
             return None
 
     @classmethod
@@ -140,10 +142,10 @@ class WeComOAuth:
                     'position': data.get('position'),
                     'wecom': data.get('alias', '')
                 }
-            logging.error("Failed to get user detail: %s", data)
+            logger.error("Failed to get user detail: %s", data)
             return None
         except Exception as e:
-            logging.error("Error getting user detail: %s", e)
+            logger.error("Error getting user detail: %s", e)
             return None
 
     @classmethod
@@ -162,8 +164,8 @@ class WeComOAuth:
                     'email': data.get('email'),
                     'avatar': data.get('avatar')
                 }
-            logging.error("Failed to get sensitive info: %s", data)
+            logger.error("Failed to get sensitive info: %s", data)
             return None
         except Exception as e:
-            logging.error("Error getting sensitive info: %s", e)
+            logger.error("Error getting sensitive info: %s", e)
             return None
