@@ -8,9 +8,9 @@ Copyright (C) 2025 AptS:1547
 
 本文件定义了UserService类，处理与用户相关的所有业务逻辑。
 """
-from argon2 import PasswordHasher
 import logging
 from typing import Dict, Optional, Any
+from argon2 import PasswordHasher
 
 from utils.postgresql_connector import PostgreSQLConnector
 
