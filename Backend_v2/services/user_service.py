@@ -8,7 +8,15 @@ Copyright (C) 2025 AptS:1547
 
 本文件定义了UserService类，处理与用户相关的所有业务逻辑。
 """
+
+# 特殊说明：本系统的密码处理流程是：
+# 1. 前端发送MD5哈希后的密码
+# 2. 后端使用Argon2对MD5哈希进行二次哈希后存储
+# 3. 验证时，比较存储的Argon2(MD5(密码))与接收的MD5(密码)
+
 import logging
+import hashlib
+
 from typing import Dict, Optional, Any
 from argon2 import PasswordHasher
 
@@ -26,12 +34,17 @@ class UserService:
             wecom = data.get('wecom', 'None')
             wecom_id = data.get('wecom_id', 0)
             name = data.get('name', 'None')
-            password = data.get('password')
+            password = data.get('password', None)
+            
             ph = PasswordHasher()
             if password is None:
-                password = ph.hash(str(name) + str(wecom_id))
+                default_pwd = str(name) + str(wecom_id)
+                md5_pwd = hashlib.md5(default_pwd.encode()).hexdigest()
+                password = ph.hash(md5_pwd)
             else:
+                # 这里假设password已经是MD5哈希了，直接用Argon2哈希
                 password = ph.hash(password)
+
             department = data.get('department', 'None')
             position = data.get('position', 'B312')
             mobile = "None"
@@ -69,7 +82,7 @@ class UserService:
             """, username)
 
             ph = PasswordHasher()
-            if row and row.get('kind') and ph.verify(row.get('password'), password):
+            if row and row.get('kind') and ph.verify(row.get('password', ''), password):
                 return (username, row['kind'])
             return None
         except Exception as e:
