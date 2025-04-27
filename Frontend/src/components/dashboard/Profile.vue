@@ -198,8 +198,9 @@ import { Bars3Icon, BellIcon, XMarkIcon, PencilIcon } from '@heroicons/vue/20/so
 import { UserCircleIcon, FingerPrintIcon, UsersIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 import { useRouter } from 'vue-router'
 import AuthService from '@/services/AuthService.js'
-import VueCropper from 'vue-cropperjs'
-import 'cropperjs/dist/cropper.css'
+import VueCropper from 'vue-cropperjs';
+import 'vue-cropperjs/dist/vue-cropper.css';
+
 import ApiServices from "@/services/ApiServices.js";
 import ChangePassword from '@/components/dashboard/profile/change_password.vue'
 

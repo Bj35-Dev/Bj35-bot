@@ -5,7 +5,7 @@ quart-jwt-extended~=0.1.0
 werkzeug<4.0.0
 
 # 异步支持
-aiohttp~=3.11.16
+aiohttp~=3.11.18
 asyncpg~=0.30.0
 
 # 任务调度
@@ -26,8 +26,11 @@ pycryptodome~=3.22.0
 
 # 类型提示
 pydantic~=2.11.3
-pydantic-settings~=2.8.1
+pydantic-settings~=2.9.1
 
 # 数据保存
 PyYAML~=6.0.2
 cryptography~=39.0.1
+
+# 姓名首字母设置
+pypinyin~=0.54.0
