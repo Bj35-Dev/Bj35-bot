@@ -15,7 +15,7 @@ from cryptography.fernet import Fernet
 
 from settings import settings
 from utils import update_access_token
-from utils.exceptions import UpdateTokenError
+from utils.exceptions import UpdateTokenError, TokenNotFoundError
 
 class TokenManager:
     """令牌管理服务，处理 access token 的存储、加密、检查和更新"""
@@ -36,7 +36,7 @@ class TokenManager:
         if not key:
             # 如果不存在，直接退出
             logging.error("数据加密密钥未设置")
-            raise ValueError("数据加密密钥未设置")
+            raise TokenNotFoundError("数据加密密钥未设置")
         return key.encode()
 
     @classmethod
