@@ -17,6 +17,8 @@ from services import UserService
 
 from settings import settings
 
+logger = logging.getLogger(__name__)
+
 URI_PREFIX = settings.URI_PREFIX
 JWT_EXPIRY_REMEMBER = datetime.timedelta(weeks=1)
 JWT_EXPIRY_DEFAULT = datetime.timedelta(days=1)
@@ -77,7 +79,7 @@ def register_routes(app):
     async def wecom_auth():
         """获取企业微信OAuth授权URL"""
         oauth_url = WeComOAuth.get_oauth_url()
-        logging.info('Redirecting to WeCom OAuth URL: %s', oauth_url)
+        logger.info('Redirecting to WeCom OAuth URL: %s', oauth_url)
         return redirect(oauth_url)
 
 

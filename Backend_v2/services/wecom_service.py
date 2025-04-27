@@ -11,13 +11,13 @@ Copyright (C) 2025 AptS:1547
 
 import json
 import logging
-import aiohttp
 from datetime import datetime
+
+import aiohttp
 
 from settings import settings
 from utils.exceptions import GetWeComTokenError
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class WeComService:

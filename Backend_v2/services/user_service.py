@@ -14,6 +14,8 @@ from argon2 import PasswordHasher
 
 from utils.postgresql_connector import PostgreSQLConnector
 
+logger = logging.getLogger(__name__)
+
 class UserService:
     """用户服务类，处理所有与用户相关的业务逻辑"""
 
@@ -42,10 +44,10 @@ class UserService:
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             ''', wecom, wecom_id, name, password, department, position, mobile, language, email, avatar_text)
 
-            logging.info("用户信息已添加: %s", name)
+            logger.info("用户信息已添加: %s", name)
             return {'success': True}
         except Exception as e:
-            logging.error("添加用户失败: %s", str(e))
+            logger.error("添加用户失败: %s", str(e))
             return {'success': False}
 
     @staticmethod
@@ -71,7 +73,7 @@ class UserService:
                 return (username, row['kind'])
             return None
         except Exception as e:
-            logging.error("验证用户凭据失败: %s", str(e))
+            logger.error("验证用户凭据失败: %s", str(e))
             raise
 
     @staticmethod
@@ -83,7 +85,7 @@ class UserService:
             """, int(wecom_id))
             return bool(result)
         except Exception as e:
-            logging.error("检查企业微信用户是否存在失败: %s", str(e))
+            logger.error("检查企业微信用户是否存在失败: %s", str(e))
             return False
 
     @staticmethod
@@ -91,14 +93,14 @@ class UserService:
         """根据用户名获取密码"""
         allowed_columns = ['wecom', 'name', 'email', 'mobile']
         if kind not in allowed_columns:
-            logging.error("无效的列名: %s", kind)
+            logger.error("无效的列名: %s", kind)
             raise ValueError(f"无效的列名: {kind}")
 
         try:
             query = f"SELECT password FROM userinfo WHERE {kind} = $1"
             return await PostgreSQLConnector.fetch_val(query, username)
         except Exception as e:
-            logging.error("获取密码失败: %s", str(e))
+            logger.error("获取密码失败: %s", str(e))
             raise
 
     @staticmethod
@@ -106,7 +108,7 @@ class UserService:
         """根据用户名获取用户信息"""
         allowed_columns = ['wecom', 'name', 'email', 'mobile', 'wecom_id']
         if kind not in allowed_columns:
-            logging.error("无效的列名: %s", kind)
+            logger.error("无效的列名: %s", kind)
             raise ValueError(f"无效的列名: {kind}")
 
         try:
@@ -114,13 +116,13 @@ class UserService:
             user_info = await PostgreSQLConnector.fetch_one(query, username)
 
             if user_info:
-                logging.debug("已获取用户信息: %s", user_info)
+                logger.debug("已获取用户信息: %s", user_info)
             else:
-                logging.debug("未找到用户: %s", username)
+                logger.debug("未找到用户: %s", username)
 
             return user_info
         except Exception as e:
-            logging.error("获取用户信息失败: %s", str(e))
+            logger.error("获取用户信息失败: %s", str(e))
             raise
 
     @staticmethod
@@ -144,14 +146,14 @@ class UserService:
         allowed_columns = ['wecom', 'wecom_id', 'name', 'password', 'department',
                            'position', 'mobile', 'language', 'email', 'avatar_text']
         if update_kind not in allowed_columns:
-            logging.error("无效的列名: %s", update_kind)
+            logger.error("无效的列名: %s", update_kind)
             raise ValueError(f"无效的列名: {update_kind}")
 
         try:
             query = f"UPDATE userinfo SET {update_kind} = $1 WHERE name = $2"
             await PostgreSQLConnector.execute(query, value, name)
-            logging.info("已更新用户信息: %s", {update_kind: value, 'name': name})
+            logger.info("已更新用户信息: %s", {update_kind: value, 'name': name})
             return {"success": True}
         except Exception as e:
-            logging.error("更新用户信息失败: %s", str(e))
+            logger.error("更新用户信息失败: %s", str(e))
             raise

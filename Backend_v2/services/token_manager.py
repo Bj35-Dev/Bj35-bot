@@ -17,6 +17,8 @@ from settings import settings
 from utils import update_access_token
 from utils.exceptions import UpdateTokenError, TokenNotFoundError
 
+logger = logging.getLogger(__name__)
+
 class TokenManager:
     """令牌管理服务，处理 access token 的存储、加密、检查和更新"""
 
@@ -35,7 +37,7 @@ class TokenManager:
         key = str(settings.DATA_ENCRYPTION_KEY)
         if not key:
             # 如果不存在，直接退出
-            logging.error("数据加密密钥未设置")
+            logger.error("数据加密密钥未设置")
             raise TokenNotFoundError("数据加密密钥未设置")
         return key.encode()
 
@@ -77,10 +79,10 @@ class TokenManager:
                 yaml.dump(data_to_save, f)
                 fcntl.flock(f, fcntl.LOCK_UN)
 
-            logging.info("Token数据已保存到文件: %s", cls.TOKEN_FILE)
+            logger.info("Token数据已保存到文件: %s", cls.TOKEN_FILE)
             return True
         except (IOError, yaml.YAMLError) as e:
-            logging.error("保存token数据失败: %s", str(e))
+            logger.error("保存token数据失败: %s", str(e))
             return False
 
     @classmethod
@@ -92,7 +94,7 @@ class TokenManager:
             Optional[Dict]: token数据字典，如果加载失败则返回None
         """
         if not cls.TOKEN_FILE.exists():
-            logging.warning("Token文件不存在: %s", cls.TOKEN_FILE)
+            logger.warning("Token文件不存在: %s", cls.TOKEN_FILE)
             return None
 
         try:
@@ -102,13 +104,13 @@ class TokenManager:
                 fcntl.flock(f, fcntl.LOCK_UN)
 
             if not data or "encrypted" not in data:
-                logging.error("Token文件格式无效")
+                logger.error("Token文件格式无效")
                 return None
 
             decrypted_data = cls._decrypt_data(data["encrypted"])
             return decrypted_data
         except (IOError, yaml.YAMLError) as e:
-            logging.error("加载token数据失败: %s", str(e))
+            logger.error("加载token数据失败: %s", str(e))
             return None
 
     @classmethod
@@ -125,16 +127,16 @@ class TokenManager:
 
             # 如果没有过期时间或token，则强制更新
             if "expire_time" not in token_data or "access_token" not in token_data:
-                logging.info("未找到有效的token数据，开始生成新的access token")
+                logger.info("未找到有效的token数据，开始生成新的access token")
 
                 try:
                     # 尝试更新token
                     access_token, expiration = await update_access_token()
                 except UpdateTokenError as e:
-                    logging.error("更新access token失败: %s", str(e))
+                    logger.error("更新access token失败: %s", str(e))
                     return False
 
-                logging.info("新的access token生成成功")
+                logger.info("新的access token生成成功")
 
                 expiration = int(datetime.strptime(expiration, "%Y-%m-%dT%H:%M:%S%z").timestamp())
 
@@ -151,13 +153,13 @@ class TokenManager:
 
             if expire_ts <= today:
                 # 如果过期时间在今天或之前，更新token
-                logging.info("Access token已过期，开始生成新的access token")
+                logger.info("Access token已过期，开始生成新的access token")
 
                 try:
                     # 尝试更新token
                     access_token, expiration = await update_access_token()
 
-                    logging.info("新的access token生成成功")
+                    logger.info("新的access token生成成功")
 
                     expiration = int(datetime.strptime(expiration,
                                                        "%Y-%m-%dT%H:%M:%S%z").timestamp())
@@ -168,12 +170,12 @@ class TokenManager:
                         "expire_time": expiration
                     })
                 except UpdateTokenError as e:
-                    logging.error("更新access token失败: %s", str(e))
+                    logger.error("更新access token失败: %s", str(e))
                     return False
 
             return True
         except (IOError, yaml.YAMLError) as e:
-            logging.error("检查或更新access token时出错：%s", str(e))
+            logger.error("检查或更新access token时出错：%s", str(e))
             return False
 
     @classmethod
@@ -182,15 +184,15 @@ class TokenManager:
         try:
             token_data = cls.load_token_data()
             if not token_data or "expire_time" not in token_data:
-                logging.warning("没有找到token过期信息")
+                logger.warning("没有找到token过期信息")
                 return
 
             expiration_ts = int(token_data["expire_time"])
             current_ts = datetime.now().timestamp()
             days_remaining = (expiration_ts - current_ts) / (60 * 60 * 24)
-            logging.info("Access token将在 %.2f天后过期", days_remaining)
+            logger.info("Access token将在 %.2f天后过期", days_remaining)
         except (IOError, yaml.YAMLError) as e:
-            logging.error("获取token过期时间失败：%s", str(e))
+            logger.error("获取token过期时间失败：%s", str(e))
 
     @classmethod
     async def get_valid_token(cls) -> bool:
@@ -213,5 +215,5 @@ class TokenManager:
             return False
 
         except (IOError, yaml.YAMLError) as e:
-            logging.error("读取token失败: %s", str(e))
+            logger.error("读取token失败: %s", str(e))
             return False

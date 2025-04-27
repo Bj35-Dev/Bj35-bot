@@ -25,10 +25,25 @@ from services import TokenManager
 from routes import register_all_routes
 
 # 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+def configure_logging():
+    """配置日志系统"""
+    # 创建日志格式器
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    formatter = logging.Formatter(log_format)
+    
+    # 创建控制台处理器
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    
+    # 可选：创建文件处理器
+    file_handler = logging.FileHandler("app.log")
+    file_handler.setFormatter(formatter)
+    
+    # 配置根日志记录器
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)  # 设置日志级别
+    root_logger.addHandler(console_handler)
+    root_logger.addHandler(file_handler)
 
 def create_app():
     """应用工厂函数"""
@@ -65,6 +80,7 @@ async def init_db():
 @app.before_serving
 async def before_serving():
     """在应用启动前执行的函数"""
+    configure_logging()
 
     await init_db()
     if await TokenManager.get_valid_token():
@@ -72,6 +88,14 @@ async def before_serving():
     else:
         logging.error("获取有效的token失败，应用将退出")
         sys.exit(1)
+
+    logging.info("应用已启动，准备接受请求 owo ~ 此版本为 1547 重构的 v2 版本")
+
+@app.after_serving
+async def after_serving():
+    """在应用关闭后执行的函数"""
+    await PostgreSQLConnector.close()
+    logging.info("应用已关闭 owo ~")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
