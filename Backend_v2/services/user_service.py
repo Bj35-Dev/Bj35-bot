@@ -8,7 +8,7 @@ Copyright (C) 2025 AptS:1547
 
 本文件定义了UserService类，处理与用户相关的所有业务逻辑。
 """
-import hashlib
+from argon2 import PasswordHasher
 import logging
 from typing import Dict, Optional, Any
 
@@ -25,10 +25,11 @@ class UserService:
             wecom_id = data.get('wecom_id', 0)
             name = data.get('name', 'None')
             password = data.get('password')
+            ph = PasswordHasher()
             if password is None:
-                password = hashlib.md5((str(name) + str(wecom_id)).encode()).hexdigest()
+                password = ph.hash(str(name) + str(wecom_id))
             else:
-                password = hashlib.md5(password.encode()).hexdigest()
+                password = ph.hash(password)
             department = data.get('department', 'None')
             position = data.get('position', 'B312')
             mobile = "None"
@@ -65,7 +66,8 @@ class UserService:
                 LIMIT 1
             """, username)
 
-            if row and row.get('kind') and row.get('password') == password:
+            ph = PasswordHasher()
+            if row and row.get('kind') and ph.verify(row.get('password'), password):
                 return (username, row['kind'])
             return None
         except Exception as e:

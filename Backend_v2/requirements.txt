@@ -34,3 +34,5 @@ cryptography~=39.0.1
 
 # 姓名首字母设置
 pypinyin~=0.54.0
+
+argon2-cffi==23.1.0
