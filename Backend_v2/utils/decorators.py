@@ -5,7 +5,7 @@ import logging
 from functools import wraps
 from quart import jsonify
 
-from .access_token import update_access_token
+from services import TokenManager
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ def error_handler(func):
                 response_json = response
                 if response_json.get('code') == 11013:
                     logger.error("Authentication failed in %s : %s",func.__name__,response_json)
-                    await update_access_token()
+                    await TokenManager.get_valid_token()
                     return jsonify(response_json), response.get('status_code', 500)
             return response
         except Exception as e:
