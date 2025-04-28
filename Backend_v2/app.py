@@ -35,15 +35,10 @@ def configure_logging():
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
     
-    # 可选：创建文件处理器
-    file_handler = logging.FileHandler("app.log")
-    file_handler.setFormatter(formatter)
-    
     # 配置根日志记录器
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)  # 设置日志级别
     root_logger.addHandler(console_handler)
-    root_logger.addHandler(file_handler)
 
 def create_app():
     """应用工厂函数"""

@@ -5,7 +5,8 @@ which manages access tokens and their storage, encryption, checking, and updatin
 """
 import logging
 import json
-import fcntl
+import os
+import platform
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
@@ -17,7 +18,70 @@ from settings import settings
 from utils import update_access_token
 from utils.exceptions import UpdateTokenError, TokenNotFoundError
 
+# 根据平台选择不同的文件锁定实现
+if platform.system() != 'Windows':
+    import fcntl
+    HAS_FCNTL = True
+else:
+    import msvcrt
+    HAS_FCNTL = False
+
 logger = logging.getLogger(__name__)
+
+
+class FileLock:
+    """跨平台的文件锁实现"""
+
+    def __init__(self, file):
+        self.file = file
+        self.fd = file.fileno()
+        self.locked = False
+
+    def lock_exclusive(self):
+        """排他锁，用于写入操作"""
+        if self.locked:
+            return
+
+        try:
+            if HAS_FCNTL:  # Unix/Linux
+                fcntl.flock(self.fd, fcntl.LOCK_EX)
+            else:  # Windows
+                self.file.seek(0)
+                msvcrt.locking(self.fd, msvcrt.LK_LOCK, os.path.getsize(self.file.name) or 1)        # pylint: disable=possibly-used-before-assignment
+            self.locked = True
+        except (IOError, OSError) as e:
+            logger.warning("无法获取文件锁: %s", e)
+
+    def lock_shared(self):
+        """共享锁，用于读取操作"""
+        if self.locked:
+            return
+
+        try:
+            if HAS_FCNTL:  # Unix/Linux
+                fcntl.flock(self.fd, fcntl.LOCK_SH)
+            else:  # Windows - 使用非排他锁
+                self.file.seek(0)
+                msvcrt.locking(self.fd, msvcrt.LK_NBLCK, os.path.getsize(self.file.name) or 1)
+            self.locked = True
+        except (IOError, OSError) as e:
+            logger.warning("无法获取文件锁: %s", e)
+
+    def unlock(self):
+        """解锁文件"""
+        if not self.locked:
+            return
+
+        try:
+            if HAS_FCNTL:  # Unix/Linux
+                fcntl.flock(self.fd, fcntl.LOCK_UN)
+            else:  # Windows
+                self.file.seek(0)
+                msvcrt.locking(self.fd, msvcrt.LK_UNLCK, os.path.getsize(self.file.name) or 1)
+            self.locked = False
+        except (IOError, OSError) as e:
+            logger.warning("无法释放文件锁: %s", e)
+
 
 class TokenManager:
     """令牌管理服务，处理 access token 的存储、加密、检查和更新"""
@@ -75,9 +139,12 @@ class TokenManager:
 
             # 使用文件锁防止并发写入
             with open(cls.TOKEN_FILE, 'w+', encoding="utf-8") as f:
-                fcntl.flock(f, fcntl.LOCK_EX)
-                yaml.dump(data_to_save, f)
-                fcntl.flock(f, fcntl.LOCK_UN)
+                lock = FileLock(f)
+                lock.lock_exclusive()
+                try:
+                    yaml.dump(data_to_save, f)
+                finally:
+                    lock.unlock()
 
             logger.info("Token数据已保存到文件: %s", cls.TOKEN_FILE)
             return True
@@ -99,9 +166,12 @@ class TokenManager:
 
         try:
             with open(cls.TOKEN_FILE, 'r', encoding="utf-8") as f:
-                fcntl.flock(f, fcntl.LOCK_SH)
-                data = yaml.safe_load(f)
-                fcntl.flock(f, fcntl.LOCK_UN)
+                lock = FileLock(f)
+                lock.lock_shared()
+                try:
+                    data = yaml.safe_load(f)
+                finally:
+                    lock.unlock()
 
             if not data or "encrypted" not in data:
                 logger.error("Token文件格式无效")
