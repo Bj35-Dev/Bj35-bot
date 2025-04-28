@@ -13,7 +13,7 @@ from quart_jwt_extended import create_access_token
 
 from utils import WeComOAuth
 
-from services import UserService
+from services import UserService, WeComService
 
 from settings import settings
 
@@ -22,23 +22,6 @@ logger = logging.getLogger(__name__)
 URI_PREFIX = settings.URI_PREFIX
 JWT_EXPIRY_REMEMBER = datetime.timedelta(weeks=1)
 JWT_EXPIRY_DEFAULT = datetime.timedelta(days=1)
-
-async def get_user(username, password):
-    """验证用户凭据"""
-    return await UserService.verify_user_credentials(username, password)
-
-async def get_user_info(username, kind):
-    """
-    Get user information by username and authentication type.
-    
-    Args:
-        username (str): The username to look up
-        kind (str): The authentication type (e.g. 'local', 'wecom')
-    
-    Returns:
-        dict: User information including name, department, etc.
-    """
-    return await UserService.get_userinfo_by_username(username, kind)
 
 def register_routes(app):
     """注册认证相关路由"""
@@ -54,10 +37,15 @@ def register_routes(app):
         if not username or not password:
             return jsonify(code=1, message="Missing username or password"), 422
 
-        user = await get_user(username, password)
+        user = await UserService.verify_user_credentials(username, password)
 
         if user:
-            user_info = await get_user_info(user[0], user[1])
+            user_info = await UserService.get_userinfo_by_username(user[0], user[1])
+
+            if not user_info:
+                app.logger.error(f"User {username} not found in database")
+                return jsonify(code=1, message="User not found")
+
             # 创建访问令牌，可选择添加更多声明
             expires_delta = JWT_EXPIRY_REMEMBER if remember_me else JWT_EXPIRY_DEFAULT
             access_token = create_access_token(
@@ -65,7 +53,7 @@ def register_routes(app):
                 expires_delta=expires_delta,
                 user_claims={
                     'username': user_info['name'],
-                    'role': user_info['department'],  # 在实际应用中，角色应从数据库获取
+                    'role': user_info['department'],
                 }
             )
             app.logger.info(f"User {username} logged in successfully")

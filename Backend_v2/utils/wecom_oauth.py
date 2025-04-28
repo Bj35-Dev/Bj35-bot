@@ -9,6 +9,8 @@ from urllib.parse import quote
 import aiohttp
 from settings import settings
 
+from services import WeComService
+
 logger = logging.getLogger(__name__)
 
 class WeComOAuth:
@@ -85,23 +87,8 @@ class WeComOAuth:
     @classmethod
     async def get_access_token(cls):
         """获取企业微信访问令牌"""
-        corp_id = settings.WECOM_CORP_ID
-        corp_secret = settings.WECOM_SECRET
-
-        url = (f"https://qyapi.weixin.qq.com/cgi-bin/gettoken?"
-               f"corpid={corp_id}&corpsecret={corp_secret}")
-
-        try:
-            response = await aiohttp.ClientSession().get(url)
-            data = await response.json()
-
-            if data.get('errcode') == 0:
-                return data.get('access_token')
-            logger.error("Failed to get access token: %s", data)
-            return None
-        except Exception as e:
-            logger.error("Error getting access token: %s", e)
-            return None
+        return await WeComService.get_access_token(
+            settings.WECOM_CORP_ID, settings.WECOM_SECRET)
 
     @classmethod
     async def get_user_id(cls, access_token, code):
