@@ -11,7 +11,7 @@ import logging
 from quart import jsonify, request, redirect
 from quart_jwt_extended import create_access_token
 
-from utils import WeComOAuth
+from services import WeComOAuth
 
 from services import UserService, WeComService
 

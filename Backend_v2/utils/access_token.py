@@ -34,8 +34,8 @@ from utils.exceptions import UpdateTokenError
 
 logger = logging.getLogger(__name__)
 
-# Function to generate signature asynchronously
-async def generate_signature(params, access_key_secret):
+# Function to generate signature
+def generate_signature(params, access_key_secret):
     """This function generates the signature for the request parameters."""
     # Sort request parameters in dictionary order
     sorted_params = sorted(params.items())
@@ -78,7 +78,7 @@ async def get_access_token(access_key_id, access_key_secret):
     }
 
     # Generate signature
-    signature = await generate_signature(params, access_key_secret)
+    signature = generate_signature(params, access_key_secret)
 
     # Add signature to request parameters
     params["signature"] = signature

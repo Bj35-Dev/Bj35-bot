@@ -12,9 +12,11 @@ Copyright (C) 2025 AptS:1547
 from .token_manager import TokenManager
 from .wecom_service import WeComService
 from .user_service import UserService
+from .wecom_oauth import WeComOAuth
 
 __all__ = [
     'TokenManager',
     'WeComService',
     'UserService',
+    'WeComOAuth',
 ]

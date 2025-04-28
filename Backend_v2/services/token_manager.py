@@ -1,7 +1,12 @@
 """
-token_manager.py
-This module provides the TokenManager class
-which manages access tokens and their storage, encryption, checking, and updating.
+Bj35 Bot v2
+Refactor by: AptS:1547
+Date: 2025-04-19
+Description: 这是在 v1 基础上重构的版本，主要改进了代码结构和可读性。
+使用 GPLv3 许可证。
+Copyright (C) 2025 AptS:1547
+
+本文件定义了令牌管理服务，包括令牌的存储、加密、检查和更新等功能。
 """
 import logging
 import json
