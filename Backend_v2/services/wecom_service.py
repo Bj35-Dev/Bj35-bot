@@ -25,6 +25,7 @@ class WeComService:
 
     __access_token: str = ""  # 存储access_token
     __token_expire_time: int = 0  # 存储access_token的过期时间
+    __BASE_URL: str = "https://qyapi.weixin.qq.com/cgi-bin"  # 企业微信API的基础URL
 
     @classmethod
     async def get_access_token(cls, corp_id, secret):
@@ -34,23 +35,23 @@ class WeComService:
                 cls.__token_expire_time > int(datetime.now().timestamp() + 60)):
             return cls.__access_token
 
-        url = f"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corp_id}&corpsecret={secret}"
+        url = cls.__BASE_URL + f"/gettoken?corpid={corp_id}&corpsecret={secret}"
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 result = await response.json()
                 if result.get("errcode") == 0:
-                    cls.access_token = result.get("access_token")
-                    cls.token_expire_time = int(
+                    cls.__access_token = result.get("access_token")
+                    cls.__token_expire_time = int(
                         datetime.now().timestamp()) + result.get("expires_in")
-                    return cls.access_token
+                    return cls.__access_token
 
         raise GetWeComTokenError(f"获取access_token失败: {result}")
 
     # 发送消息
-    @staticmethod
-    async def send_message(access_token, user_id, message_content):
+    @classmethod
+    async def _send_message(cls, access_token, user_id, message_content):
         """发送消息"""
-        url = f"https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={access_token}"
+        url = cls.__BASE_URL + f"/message/send?access_token={access_token}"
         data = {
             "touser": user_id,  # 接收消息的用户ID
             "msgtype": "text",  # 消息类型为文本
@@ -74,4 +75,4 @@ class WeComService:
     async def send(cls, user_id, message_content):
         """发送消息"""
         access_token = await cls.get_access_token(settings.WECOM_CORP_ID, settings.WECOM_SECRET)
-        await cls.send_message(access_token, user_id, message_content)
+        await cls._send_message(access_token, user_id, message_content)
