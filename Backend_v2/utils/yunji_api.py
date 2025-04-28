@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 BASE_URL = 'https://open-api.yunjiai.cn/v3'
 
+
 def create_headers():
     """创建请求头，包含签名随机数、时间戳、访问密钥ID和访问令牌"""
     signature_nonce = str(uuid.uuid4())
@@ -25,6 +26,7 @@ def create_headers():
                'token': str(access_token)}
     return headers
 
+
 async def get_device_list():
     """步获取设备列表"""
     headers = create_headers()
@@ -32,13 +34,15 @@ async def get_device_list():
         async with session.get(BASE_URL + f'/device/list?accessToken%3D{access_token}') as response:
             return json.loads(await response.text())
 
+
 async def get_device_status(chassis_id):
     """异步获取指定设备的状态"""
     headers = create_headers()
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(
-            BASE_URL + f'/robot/{chassis_id}/status?accessToken%3D{access_token}') as response:
+                BASE_URL + f'/robot/{chassis_id}/status?accessToken%3D{access_token}') as response:
             return json.loads(await response.text())
+
 
 async def get_device_task(chassis_id):
     """异步获取指定设备的任务列表"""
@@ -46,6 +50,7 @@ async def get_device_task(chassis_id):
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(BASE_URL + f'/robots/{chassis_id}/tasks') as response:
             return json.loads(await response.text())
+
 
 async def get_school_tasks(page_size, current):
     """异步获取学校任务列表，支持分页"""
@@ -58,6 +63,7 @@ async def get_school_tasks(page_size, current):
         async with session.get(BASE_URL + '/rcs/task/list', params=params) as response:
             return json.loads(await response.text())
 
+
 async def get_cabin_position(cabin_id):
     """异步获取指定设备的仓位位置"""
     headers = create_headers()
@@ -65,14 +71,16 @@ async def get_cabin_position(cabin_id):
         async with session.get(BASE_URL + f'/robot/{cabin_id}/position') as response:
             return json.loads(await response.text())
 
+
 async def reset_cabin_position(cabin_id, position):
     """异步重置指定设备的仓位位置"""
     headers = create_headers()
     data = {"marker": position}
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.put(
-            BASE_URL + f'/robot/up/cabin/{cabin_id}/reset-position', json=data) as response:
+                BASE_URL + f'/robot/up/cabin/{cabin_id}/reset-position', json=data) as response:
             return json.loads(await response.text())
+
 
 async def get_running_task():
     """异步获取正在运行的任务列表"""
@@ -80,17 +88,18 @@ async def get_running_task():
     data = {'storeId': settings.YUNJI_STORE_ID}
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(
-            BASE_URL + '/rcs/task/running-task/list', json=data) as response:
+                BASE_URL + '/rcs/task/running-task/list', json=data) as response:
             return json.loads(await response.text())
+
 
 async def make_task_flow_move_target_and_lift_down(cabin_id, target):
     """异步创建任务流，移动到指定目标并放下货柜"""
     headers = create_headers()
     data = {
-          "outTaskId": str(uuid.uuid4()),
-          "templateId": "dock_cabin_and_move_target_and_lift_down",
-          "storeId": settings.YUNJI_STORE_ID,
-          "params": {
+        "outTaskId": str(uuid.uuid4()),
+        "templateId": "dock_cabin_and_move_target_and_lift_down",
+        "storeId": settings.YUNJI_STORE_ID,
+        "params": {
             "dockCabinId": cabin_id,
             "target": target
         }
@@ -99,26 +108,27 @@ async def make_task_flow_move_target_and_lift_down(cabin_id, target):
         async with session.post(BASE_URL + '/rcs/task/flow/execute', json=data) as response:
             return json.loads(await response.text())
 
-async def make_task_flow_docking_cabin_and_move_target(cabin_id,chassis_id,target):
+
+async def make_task_flow_docking_cabin_and_move_target(cabin_id, chassis_id, target):
     """异步创建任务流，对接货柜并移动到指定目标"""
     headers = create_headers()
     data = {
-              "outTaskId": str(uuid.uuid4()),
-              "templateId": "docking_cabin_and_move_target",
-              "storeId": settings.YUNJI_STORE_ID,
-              "params": {
-                "dockCabinId": cabin_id,
-                "chassisId": chassis_id,
-                "target": target
-              }
-            }
+        "outTaskId": str(uuid.uuid4()),
+        "templateId": "docking_cabin_and_move_target",
+        "storeId": settings.YUNJI_STORE_ID,
+        "params": {
+            "dockCabinId": cabin_id,
+            "chassisId": chassis_id,
+            "target": target
+        }
+    }
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.post(
                 BASE_URL + '/rcs/task/flow/execute', json=data) as response:
             return json.loads(await response.text())
 
-async def make_task_flow_dock_cabin_and_move_target_with_wait_action\
-                (cabin_id,chassis_id,target,overtime):
+
+async def make_task_flow_dock_cabin_and_move_target_with_wait_action(cabin_id, chassis_id, target, overtime):
     """
     异步创建任务流，对接货柜并移动到指定目标，支持等待操作
         cabin_id 上仓ID
@@ -128,51 +138,55 @@ async def make_task_flow_dock_cabin_and_move_target_with_wait_action\
     """
     headers = create_headers()
     data = {
-              "outTaskId": str(uuid.uuid4()),
-              "templateId": "dock_cabin_and_move_target_with_wait_action",
-              "storeId": settings.YUNJI_STORE_ID,
-              "params": {
-                "dockCabinId": cabin_id,
-                "chassisId": chassis_id,
-                "target": target,
-                "overtime": overtime,
-                "overtimeEvent": "back"
-              }
-            }
-    async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.post(BASE_URL + '/rcs/task/flow/execute', json=data) as response:
-            return json.loads(await response.text())
-
-async def make_task_flow_move_and_lift_down(cabin_id,chassis_id, target):
-    """异步创建任务流，移动到指定目标并放下货柜"""
-    headers = create_headers()
-    data = {
-              "outTaskId": str(uuid.uuid4()),
-              "templateId": "dock_cabin_to_move_and_lift_down",
-              "storeId": settings.YUNJI_STORE_ID,
-              "params": {
-              "dockCabinId": cabin_id,
-              "chassisId": chassis_id,
-              "target": target
-              }
+        "outTaskId": str(uuid.uuid4()),
+        "templateId": "dock_cabin_and_move_target_with_wait_action",
+        "storeId": settings.YUNJI_STORE_ID,
+        "params": {
+            "dockCabinId": cabin_id,
+            "chassisId": chassis_id,
+            "target": target,
+            "overtime": overtime,
+            "overtimeEvent": "back"
+        }
     }
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.post(BASE_URL + '/rcs/task/flow/execute', json=data) as response:
             return json.loads(await response.text())
 
+
+async def make_task_flow_move_and_lift_down(cabin_id, chassis_id, target):
+    """异步创建任务流，移动到指定目标并放下货柜"""
+    headers = create_headers()
+    data = {
+        "outTaskId": str(uuid.uuid4()),
+        "templateId": "dock_cabin_to_move_and_lift_down",
+        "storeId": settings.YUNJI_STORE_ID,
+        "params": {
+            "dockCabinId": cabin_id,
+            "chassisId": chassis_id,
+            "target": target
+        }
+    }
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.post(BASE_URL + '/rcs/task/flow/execute', json=data) as response:
+            return json.loads(await response.text())
+
+
 async def get_device_by_id(cabin_id):
     """根据设备ID获取设备对象"""
     return {"id": cabin_id, "type": "robot"}
 
+
 async def check(cabin_id):
     """检查设备状态，判断是否开门或关门"""
-    res=await get_device_status(cabin_id)
-    status=[res["data"]["deviceStatus"]["lockers"][0]["status"],
-            res["data"]["deviceStatus"]["lockers"][1]["status"]]
+    res = await get_device_status(cabin_id)
+    status = [res["data"]["deviceStatus"]["lockers"][0]["status"],
+              res["data"]["deviceStatus"]["lockers"][1]["status"]]
     if "OPEN" in status:
         return "open"
-    elif status==["CLOSE", "CLOSE"]:
+    elif status == ["CLOSE", "CLOSE"]:
         return "close"
+
 
 async def run(locations, cabin_id):
     """执行任务流
@@ -201,7 +215,6 @@ async def run(locations, cabin_id):
     if chassis_id == "" or chassis_id is None:
         return {'code': 1, 'message': f'找不到匹配的CABIN通过前缀: {cabin_prefix}'}
 
-
     try:
         if not locations:
             return {'code': 1, 'message': '位置列表不能为空'}
@@ -218,7 +231,7 @@ async def run(locations, cabin_id):
                     raise ValueError(f"找不到设备ID: {cabin_id}")
                 # 执行任务
                 res = await (make_task_flow_dock_cabin_and_move_target_with_wait_action
-                             (cabin_id,chassis_id, location, 100))
+                             (cabin_id, chassis_id, location, 100))
                 flag = False  # 标记是否完成一次开门关门 关门为 False 开门为 True
                 task_results.append(res)
                 logger.info('位置 %s 任务执行结果: %s', location, res)
@@ -241,4 +254,4 @@ async def run(locations, cabin_id):
         return {'code': 1, 'message': f'任务流执行失败: {str(e)}'}
 
     await (make_task_flow_dock_cabin_and_move_target_with_wait_action
-           (cabin_id,chassis_id, "charge_point_1F_40300716", 100))
+           (cabin_id, chassis_id, "charge_point_1F_40300716", 100))
