@@ -2,8 +2,6 @@
 """
 This module provides functions to interact with Yunji's API.
 """
-import sys
-import os
 import uuid
 import time
 import json
@@ -13,15 +11,15 @@ import aiohttp
 
 from settings import settings
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 access_token = settings.YUNJI_ACCESS_TOKEN
 logger = logging.getLogger(__name__)
 
+BASE_URL = 'https://open-api.yunjiai.cn/v3'
+
 def create_headers():
     """创建请求头，包含签名随机数、时间戳、访问密钥ID和访问令牌"""
-    signatureNonce = str(uuid.uuid4())
-    headers = {'signatureNonce': signatureNonce,
+    signature_nonce = str(uuid.uuid4())
+    headers = {'signatureNonce': signature_nonce,
                'timestamp': str(time.strftime('%Y-%m-%dT%H:%M:%S+08:00', time.gmtime())),
                'accessKeyId': settings.YUNJI_ACCESS_KEY_ID,
                'token': str(access_token)}
@@ -31,44 +29,40 @@ async def get_device_list():
     """步获取设备列表"""
     headers = create_headers()
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(f'https://open-api.yunjiai.cn/v3/device/'
-                               f'list?accessToken%3D{access_token}') as response:
+        async with session.get(BASE_URL + f'/device/list?accessToken%3D{access_token}') as response:
             return json.loads(await response.text())
 
 async def get_device_status(chassis_id):
     """异步获取指定设备的状态"""
     headers = create_headers()
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(f'https://open-api.yunjiai.cn/v3/robot/'
-                               f'{chassis_id}/status?accessToken%3D{access_token}') as response:
+        async with session.get(
+            BASE_URL + f'/robot/{chassis_id}/status?accessToken%3D{access_token}') as response:
             return json.loads(await response.text())
 
 async def get_device_task(chassis_id):
     """异步获取指定设备的任务列表"""
     headers = create_headers()
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(f'https://open-api.yunjiai.cn/v3/robots/'
-                               f'{chassis_id}/tasks') as response:
+        async with session.get(BASE_URL + f'/robots/{chassis_id}/tasks') as response:
             return json.loads(await response.text())
 
-async def get_school_tasks(pageSize, current):
+async def get_school_tasks(page_size, current):
     """异步获取学校任务列表，支持分页"""
     headers = create_headers()
     async with aiohttp.ClientSession(headers=headers) as session:
         params = {'storeIds': settings.YUNJI_STORE_ID,
-                  'pageSize': pageSize,
+                  'pageSize': page_size,
                   'current': current
                   }
-        async with session.get(f'https://open-api.yunjiai.cn/v3/rcs/'
-                               f'task/list', params=params) as response:
+        async with session.get(BASE_URL + '/rcs/task/list', params=params) as response:
             return json.loads(await response.text())
 
 async def get_cabin_position(cabin_id):
     """异步获取指定设备的仓位位置"""
     headers = create_headers()
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(f'https://open-api.yunjiai.cn/v3/robot/'
-                               f'{cabin_id}/position') as response:
+        async with session.get(BASE_URL + f'/robot/{cabin_id}/position') as response:
             return json.loads(await response.text())
 
 async def reset_cabin_position(cabin_id, position):
@@ -76,17 +70,17 @@ async def reset_cabin_position(cabin_id, position):
     headers = create_headers()
     data = {"marker": position}
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.put(f'https://open-api.yunjiai.cn/v3/robot/'
-                               f'up/cabin/{cabin_id}/reset-position', json=data) as response:
+        async with session.put(
+            BASE_URL + f'/robot/up/cabin/{cabin_id}/reset-position', json=data) as response:
             return json.loads(await response.text())
 
 async def get_running_task():
     """异步获取正在运行的任务列表"""
     headers = create_headers()
-    storeId = settings.YUNJI_STORE_ID
+    data = {'storeId': settings.YUNJI_STORE_ID}
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(f'https://open-api.yunjiai.cn/v3/rcs/'
-                               f'task/running-task/list', json={'storeId': storeId}) as response:
+        async with session.get(
+            BASE_URL + '/rcs/task/running-task/list', json=data) as response:
             return json.loads(await response.text())
 
 async def make_task_flow_move_target_and_lift_down(cabin_id, target):
@@ -102,8 +96,7 @@ async def make_task_flow_move_target_and_lift_down(cabin_id, target):
         }
     }
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.post(f'https://open-api.yunjiai.cn/v3/rcs/'
-                                f'task/flow/execute', json=data) as response:
+        async with session.post(BASE_URL + '/rcs/task/flow/execute', json=data) as response:
             return json.loads(await response.text())
 
 async def make_task_flow_docking_cabin_and_move_target(cabin_id,chassis_id,target):
@@ -121,7 +114,7 @@ async def make_task_flow_docking_cabin_and_move_target(cabin_id,chassis_id,targe
             }
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.post(
-                f'https://open-api.yunjiai.cn/v3/rcs/task/flow/execute', json=data) as response:
+                BASE_URL + '/rcs/task/flow/execute', json=data) as response:
             return json.loads(await response.text())
 
 async def make_task_flow_dock_cabin_and_move_target_with_wait_action\
@@ -147,8 +140,7 @@ async def make_task_flow_dock_cabin_and_move_target_with_wait_action\
               }
             }
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.post(f'https://open-api.yunjiai.cn/v3/rcs/'
-                                f'task/flow/execute', json=data) as response:
+        async with session.post(BASE_URL + '/rcs/task/flow/execute', json=data) as response:
             return json.loads(await response.text())
 
 async def make_task_flow_move_and_lift_down(cabin_id,chassis_id, target):
@@ -165,19 +157,15 @@ async def make_task_flow_move_and_lift_down(cabin_id,chassis_id, target):
               }
     }
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.post(
-                f'https://open-api.yunjiai.cn/v3/rcs/task/flow/execute', json=data) as response:
+        async with session.post(BASE_URL + '/rcs/task/flow/execute', json=data) as response:
             return json.loads(await response.text())
 
 async def get_device_by_id(cabin_id):
     """根据设备ID获取设备对象"""
     return {"id": cabin_id, "type": "robot"}
 
-async def sleep(time):
-    """异步休眠指定时间"""
-    await asyncio.sleep(time)
-
 async def check(cabin_id):
+    """检查设备状态，判断是否开门或关门"""
     res=await get_device_status(cabin_id)
     status=[res["data"]["deviceStatus"]["lockers"][0]["status"],
             res["data"]["deviceStatus"]["lockers"][1]["status"]]
@@ -196,15 +184,18 @@ async def run(locations, cabin_id):
         dict: 包含执行结果的状态码和消息
     """
 
-    cabins = settings.CABINS
+    cabins = dict(settings.CABINS)
+    chassis = dict(settings.CHASSIS)
     cabin_prefix = cabin_id[0:6]
+    chassis_id = ""
 
     for key, value in cabins.items():
         if cabin_prefix in value:
             logger.info('找到匹配的CABIN: %s, 对应的位置: %s', value, key)
             try:
-                chassis_id = settings.CHASSIS.get(key, None)
-            except:
+                chassis_id = chassis.get(key, None)
+            except KeyError:
+                logger.error('找不到匹配的底盘ID: %s', key)
                 return {'code': 1, 'message': '找不到匹配的底盘ID'}
 
     if chassis_id == "" or chassis_id is None:
