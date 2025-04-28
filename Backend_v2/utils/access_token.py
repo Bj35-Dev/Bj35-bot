@@ -62,7 +62,7 @@ async def get_access_token(access_key_id, access_key_secret):
     # Current timestamp
     timestamp = time.strftime('%Y-%m-%dT%H:%M:%S+08:00', time.localtime())
 
-    logger.info("Current timestamp: %d", timestamp)
+    logger.info("Current timestamp: %s", timestamp)
 
     # Unique signatureNonce
     signature_nonce = str(uuid.uuid4())
