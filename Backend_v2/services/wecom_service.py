@@ -23,16 +23,16 @@ logger = logging.getLogger(__name__)
 class WeComService:
     """企业微信服务类，处理与企业微信相关的所有业务逻辑"""
 
-    access_token: str = ""  # 存储access_token
-    token_expire_time: int = 0  # 存储access_token的过期时间
+    __access_token: str = ""  # 存储access_token
+    __token_expire_time: int = 0  # 存储access_token的过期时间
 
     @classmethod
     async def get_access_token(cls, corp_id, secret):
         """获取企业微信的access_token"""
 
-        if (cls.access_token and
-                cls.token_expire_time > int(datetime.now().timestamp() + 60)):
-            return cls.access_token
+        if (cls.__access_token and
+                cls.__token_expire_time > int(datetime.now().timestamp() + 60)):
+            return cls.__access_token
 
         url = f"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corp_id}&corpsecret={secret}"
         async with aiohttp.ClientSession() as session:
