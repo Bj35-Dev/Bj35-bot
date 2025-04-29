@@ -10,6 +10,7 @@ Copyright (C) 2025 AptS:1547
 """
 
 from .postgresql_connector import PostgreSQLConnector
+from .redis_connector import RedisConnector
 
 from .access_token import generate_signature, get_access_token, update_access_token
 from .jwt_handlers import configure_jwt_handlers
@@ -19,7 +20,7 @@ from .decorators import error_handler
 from . import yunji_api, exceptions
 
 __all__ = [
-    'PostgreSQLConnector', 
+    'PostgreSQLConnector', 'RedisConnector',
 
     'configure_jwt_handlers', 'error_handler',
 

@@ -64,7 +64,7 @@ def register_routes(app):
     @app.route(URI_PREFIX + '/auth/wecom', methods=['GET'])
     async def wecom_auth():
         """获取企业微信OAuth授权URL"""
-        oauth_url = WeComService.get_oauth_url()
+        oauth_url = await WeComService.get_oauth_url()
         logger.info('Redirecting to WeCom OAuth URL: %s', oauth_url)
         return redirect(oauth_url)
 

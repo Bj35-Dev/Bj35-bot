@@ -18,6 +18,7 @@ from datetime import datetime
 import aiohttp
 
 from settings import settings
+from utils import RedisConnector
 from utils.exceptions import GetWeComTokenError
 
 logger = logging.getLogger(__name__)
@@ -29,7 +30,6 @@ class WeComService:
     __access_token: str = ""  # 存储access_token
     __token_expire_time: int = 0  # 存储access_token的过期时间
     __BASE_URL: str = "https://qyapi.weixin.qq.com/cgi-bin"  # 企业微信API的基础URL
-    __state = []  # 存储state参数，用于OAuth2.0授权
 
     @classmethod
     async def get_access_token(cls):
@@ -52,7 +52,7 @@ class WeComService:
 
         raise GetWeComTokenError(f"获取access_token失败: {result}")
 
-    # 发送消息
+    # 企业微信消息发送
     @classmethod
     async def _send_message(cls, access_token, user_id, message_content):
         """发送消息"""
@@ -82,8 +82,9 @@ class WeComService:
         access_token = await cls.get_access_token()
         await cls._send_message(access_token, user_id, message_content)
 
+    # 企业微信OAuth2.0授权
     @classmethod
-    def get_oauth_url(cls):
+    async def get_oauth_url(cls):
         """获取企业微信 OAuth 授权 URL"""
         corp_id = settings.WECOM_CORP_ID
         redirect_uri = quote(settings.WECOM_REDIRECT_URI, safe='')
@@ -92,7 +93,8 @@ class WeComService:
         # 生成随机字符串作为 state 参数
         state = ''.join(random.choices(
             'abcdefghijklmnopqrstuvwxyz0123456789', k=16))
-        cls.__state.append(state)
+        
+        await RedisConnector.store_oauth_state(state)
 
         # 构建授权URL
         oauth_url = (
@@ -111,52 +113,47 @@ class WeComService:
     @classmethod
     async def get_user_info(cls, code: str, state: str):
         """通过授权码获取用户信息"""
-        if state not in cls.__state:
-            logger.error("State mismatch")
+        if not await RedisConnector.verify_oauth_state(state):
+            logger.warning("无效的state参数，可能是CSRF攻击")
             return None
-        cls.__state.remove(state)
 
-        try:
-            # 1. 获取访问令牌
-            access_token = await cls.get_access_token()
-            if not access_token:
-                logger.error("Failed to get access token")
-                return None
-
-            # 2. 使用授权码获取用户身份
-            user_info = await cls.get_user_id(access_token, code)
-            if not user_info or user_info.get('userid') is None:
-                # 判断非企业成员 / 接口错误
-                logger.error("Failed to get user ID")
-                return None
-
-            # 3. 获取用户基本信息
-            user_detail = await cls.get_user_detail(access_token, user_info.get('userid'))
-            if not user_detail:
-                return None
-
-            # 4. 如果有user_ticket，获取敏感信息
-            if user_info.get('user_ticket'):
-                sensitive_info = await (cls.get_sensitive_info
-                                        (access_token, user_info.get('user_ticket')))
-                if sensitive_info:
-                    user_detail.update(sensitive_info)
-
-            return user_detail
-
-        except Exception as e:
-            logger.error("Error getting user info: %s", e)
+        # 1. 获取访问令牌
+        access_token = await cls.get_access_token()
+        if not access_token:
+            logger.error("Failed to get access token")
             return None
+
+        # 2. 使用授权码获取用户身份
+        user_info = await cls.__get_user_id(access_token, code)
+        if not user_info or user_info.get('userid') is None:
+            # 判断非企业成员 / 接口错误
+            logger.error("Failed to get user ID")
+            return None
+
+        # 3. 获取用户基本信息
+        user_detail = await cls.__get_user_detail(access_token, user_info.get('userid'))
+        if not user_detail:
+            return None
+
+        # 4. 如果有user_ticket，获取敏感信息
+        if user_info.get('user_ticket'):
+            sensitive_info = await (cls.__get_sensitive_info
+                                    (access_token, user_info.get('user_ticket')))
+            if sensitive_info:
+                user_detail.update(sensitive_info)
+
+        return user_detail
 
     @classmethod
-    async def get_user_id(cls, access_token, code):
+    async def __get_user_id(cls, access_token, code):
         """通过授权码获取用户ID"""
-        url = (f"https://qyapi.weixin.qq.com/cgi-bin/auth/getuserinfo?"
-               f"access_token={access_token}&code={code}")
+        url = cls.__BASE_URL + \
+            f"/auth/getuserinfo?access_token={access_token}&code={code}"
 
         try:
-            response = await aiohttp.ClientSession().get(url)
-            data = await response.json()
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    data = await response.json()
 
             if data is not None and data.get('errcode') == 0:
                 return {
@@ -165,19 +162,23 @@ class WeComService:
                 }
             logger.error("Failed to get user ID: %s", data)
             return None
-        except Exception as e:
-            logger.error("Error getting user ID: %s", e)
+        except aiohttp.ClientError as e:
+            logger.error("HTTP client error getting user ID: %s", e)
+            return None
+        except json.JSONDecodeError as e:
+            logger.error("JSON decode error getting user ID: %s", e)
             return None
 
     @classmethod
-    async def get_user_detail(cls, access_token, userid):
+    async def __get_user_detail(cls, access_token, userid):
         """获取用户基本信息"""
-        url = (f"https://qyapi.weixin.qq.com/cgi-bin/user/get?"
-               f"access_token={access_token}&userid={userid}")
+        url = cls.__BASE_URL + \
+            f"/user/get?access_token={access_token}&userid={userid}"
 
         try:
-            response = await aiohttp.ClientSession().get(url)
-            data = await response.json()
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    data = await response.json()
 
             if data.get('errcode') == 0:
                 return {
@@ -189,19 +190,24 @@ class WeComService:
                 }
             logger.error("Failed to get user detail: %s", data)
             return None
-        except Exception as e:
-            logger.error("Error getting user detail: %s", e)
+        except aiohttp.ClientError as e:
+            logger.error("HTTP client error getting user detail: %s", e)
+            return None
+        except json.JSONDecodeError as e:
+            logger.error("JSON decode error getting user detail: %s", e)
             return None
 
     @classmethod
-    async def get_sensitive_info(cls, access_token, user_ticket):
+    async def __get_sensitive_info(cls, access_token, user_ticket):
         """获取用户敏感信息"""
-        url = f"https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail?access_token={access_token}"
+        url = cls.__BASE_URL + \
+            f"/user/getuserdetail?access_token={access_token}"
         data = {"user_ticket": user_ticket}
 
         try:
-            response = await aiohttp.ClientSession().post(url, json=data)
-            data = await response.json()
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url) as response:
+                    data = await response.json()
 
             if data.get('errcode') == 0:
                 return {
@@ -211,6 +217,9 @@ class WeComService:
                 }
             logger.error("Failed to get sensitive info: %s", data)
             return None
-        except Exception as e:
-            logger.error("Error getting sensitive info: %s", e)
+        except aiohttp.ClientError as e:
+            logger.error("HTTP client error getting sensitive info: %s", e)
+            return None
+        except json.JSONDecodeError as e:
+            logger.error("JSON decode error getting sensitive info: %s", e)
             return None

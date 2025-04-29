@@ -100,11 +100,10 @@ async def get_access_token(access_key_id, access_key_secret):
         async with session.post(url, json=params) as response:
             response_json = await response.json()
             if response_json["code"] == 0:
-                logger.debug("Obtained accessToken: %s", response_json)
-                logger.info("Obtained accessToken: %s", response_json["data"]["accessToken"])
-                logger.info("Token expiration time: %s", response_json["data"]["expiration"])
+                logger.debug("Obtained accessToken: %s", response_json["data"]["accessToken"])
+                logger.debug("Token expiration time: %s", response_json["data"]["expiration"])
                 return response_json
-            raise UpdateTokenError(f"Failed to obtain accessToken: {response_json['msg']}")
+            raise UpdateTokenError(f"Failed to obtain accessToken: {response_json['message']}")
 
 async def update_access_token():
     """This function updates the accessToken and expiration time."""

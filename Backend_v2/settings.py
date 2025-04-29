@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     DB_POOL_MAX_SIZE: int = Field(default=10)
     DB_SSL: bool = Field(default=False)
 
+    # Redis 配置
+    REDIS_URL: str = Field(default="redis://localhost:6379/0")
+    REDIS_PASSWORD: str = Field(default="password")
+    REDIS_POOL_MAX_SIZE: int = Field(default=10)
+
     # 接口认证相关
     AUTH_JWT_SECRET_KEY: str = Field(default="jwt_secret_key")
 

@@ -17,28 +17,31 @@ from quart_cors import cors
 from quart_jwt_extended import JWTManager
 
 from settings import settings
-from utils import PostgreSQLConnector
-from utils.exceptions import DatabaseConnectionError
+from utils import PostgreSQLConnector, RedisConnector
+from utils.exceptions import DatabaseConnectionError, RedisConnectionError
 from utils import configure_jwt_handlers
 from services import TokenManager
 
 from routes import register_all_routes
 
 # 配置日志
+
+
 def configure_logging():
     """配置日志系统"""
     # 创建日志格式器
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     formatter = logging.Formatter(log_format)
-    
+
     # 创建控制台处理器
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
-    
+
     # 配置根日志记录器
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)  # 设置日志级别
     root_logger.addHandler(console_handler)
+
 
 def create_app():
     """应用工厂函数"""
@@ -57,34 +60,46 @@ def create_app():
 
     return quart_app
 
+
 # 创建应用实例
 app = create_app()
+
 
 async def init_db():
     """初始化数据库连接"""
     try:
         await PostgreSQLConnector.initialize()
+        await RedisConnector.initialize()
+        logging.info("数据库连接初始化成功")
+        return True
     except DatabaseConnectionError as e:
         if settings.ENV == 'development':
             logging.error("数据库初始化失败: %s", e)
-            return
+            return True
+        return False
+    except RedisConnectionError as e:
+        if settings.ENV == 'development':
+            logging.error("Redis初始化失败: %s", e)
+            return True
+        return False
 
-        logging.critical("数据库初始化失败，应用将退出: %s", e)
-        sys.exit(1)
 
 @app.before_serving
 async def before_serving():
     """在应用启动前执行的函数"""
     configure_logging()
 
-    await init_db()
+    if await init_db():
+        logging.info("数据库连接成功")
     if await TokenManager.get_valid_token():
         TokenManager.log_token_expiry()
+        logging.info("获取有效的token成功")
     else:
         logging.error("获取有效的token失败，应用将退出")
         sys.exit(1)
 
     logging.info("应用已启动，准备接受请求 owo ~ 此版本为 1547 重构的 v2 版本")
+
 
 @app.after_serving
 async def after_serving():
