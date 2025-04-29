@@ -23,11 +23,12 @@
 
 - **Web框架**: Quart (异步Flask)
 - **数据库**: PostgreSQL
+- **缓存**: Redis  # 新增
 - **认证**: JWT + 企业微信OAuth
-- **运行时**: Python 3.11+
+- **运行时**: Python 3.13+  # 版本更新
 - **容器化**: Docker
 - **任务调度**: APScheduler
-- **第三方集成**: 云迹机器人API、企业微信API
+- **第三方集成**: 云迹机器人API、企业微信服务
 
 ## 2. 核心模块
 
@@ -44,11 +45,13 @@
   - token_manager.py: 令牌管理
   - user_service.py: 用户服务
   - wecom_service.py: 企业微信服务
+  - access_token.py: 访问令牌管理  # 新增
 - **utils/**: 工具函数
   - yunji_api.py: 云迹API封装
   - decorators.py: 装饰器
   - exceptions.py: 自定义异常
   - jwt_handlers.py: JWT处理
+  - redis_connector.py: Redis连接器  # 新增
 - **settings.py**: 全局配置
 
 ### 2.2 关键函数
@@ -230,20 +233,26 @@ hypercorn app:app --bind 0.0.0.0:8080
    - 增加重试机制
    - 超时处理改进
    - 详细错误记录
+   - 修复Redis连接器中的语法错误：将`with await pool`改为`async with pool`  # 新增
 
-3. **测试覆盖**:
+3. **数据持久化**:  # 新部分
+   - 优化Redis连接池管理
+   - 完善事务处理机制
+
+4. **测试覆盖**:
    - 添加单元测试
    - 添加集成测试
 
-4. **文档完善**:
+5. **文档完善**:
    - 更新API文档
    - 添加每个函数的详细注释
 
-5. **安全审查**:
+6. **安全审查**:
    - 进行全面的安全审核
    - 实现更完善的日志系统
 
 ---
 
-*文档版本: v0.9 (重构中)*
-*最后更新: 2025-04-19*
+*文档版本: v0.95 (重构中)*
+*最后更新: 2025-04-29*
+*作者: The ESAP Project AptS:1547*
