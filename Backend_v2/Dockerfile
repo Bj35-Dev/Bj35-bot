@@ -15,19 +15,22 @@ RUN pip install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple --no-cac
 
 FROM base AS final
 
-COPY --from=dependencies /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=dependencies /usr/local/bin /usr/local/bin
+WORKDIR /app
+
+RUN mkdir -p /app/data
 
 RUN adduser --disabled-password --gecos "" appuser
+
+COPY --from=dependencies /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=dependencies /usr/local/bin /usr/local/bin
 
 COPY . .
 
 RUN if [ ! -f .env ]; then cp -n .env.example .env 2>/dev/null || echo "No .env.example found"; fi
 
-# 设置文件所有者
-RUN chown -R appuser:appuser /app
-
 VOLUME /app/data
+
+RUN chown -R appuser:appuser /app
 
 USER appuser
 
