@@ -11,8 +11,6 @@ import logging
 from quart import jsonify, request, redirect
 from quart_jwt_extended import create_access_token
 
-from services import WeComOAuth
-
 from services import UserService, WeComService
 
 from settings import settings
@@ -66,7 +64,7 @@ def register_routes(app):
     @app.route(URI_PREFIX + '/auth/wecom', methods=['GET'])
     async def wecom_auth():
         """获取企业微信OAuth授权URL"""
-        oauth_url = WeComOAuth.get_oauth_url()
+        oauth_url = WeComService.get_oauth_url()
         logger.info('Redirecting to WeCom OAuth URL: %s', oauth_url)
         return redirect(oauth_url)
 
@@ -82,7 +80,7 @@ def register_routes(app):
             return redirect(settings.WECOM_FRONTEND_URL + '/login?error=missing_parameters')
 
         # 获取用户信息
-        user_info = await WeComOAuth.get_user_info(code, state)
+        user_info = await WeComService.get_user_info(code, state)
 
         if not user_info or not user_info.get('userid'):
             app.logger.error("Failed to get user info from WeChat Work")
