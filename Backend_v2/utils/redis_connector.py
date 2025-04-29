@@ -34,7 +34,6 @@ class RedisConnector:
             cls.__pool = await cls._get_pool()
 
             conn = redis.Redis(connection_pool=cls.__pool)
-            logger.info(conn.ping())
             try:
                 await conn.ping()
             except RedisError as e:
