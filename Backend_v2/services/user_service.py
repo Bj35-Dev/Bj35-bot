@@ -39,10 +39,8 @@ class UserService:
             ph = PasswordHasher()
             if password is None:
                 default_pwd = str(name) + str(wecom_id)
-                md5_pwd = hashlib.md5(default_pwd.encode()).hexdigest()
-                password = ph.hash(md5_pwd)
+                password = ph.hash(default_pwd)
             else:
-                # 这里假设password已经是MD5哈希了，直接用Argon2哈希
                 password = ph.hash(password)
 
             department = data.get('department', 'None')
