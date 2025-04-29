@@ -11,7 +11,6 @@ import aiohttp
 
 from settings import settings
 
-access_token = settings.YUNJI_ACCESS_TOKEN
 logger = logging.getLogger(__name__)
 
 BASE_URL = 'https://open-api.yunjiai.cn/v3'
@@ -23,7 +22,7 @@ def create_headers():
     headers = {'signatureNonce': signature_nonce,
                'timestamp': str(time.strftime('%Y-%m-%dT%H:%M:%S+08:00', time.gmtime())),
                'accessKeyId': settings.YUNJI_ACCESS_KEY_ID,
-               'token': str(access_token)}
+               'token': str(settings.YUNJI_ACCESS_TOKEN)}
     return headers
 
 

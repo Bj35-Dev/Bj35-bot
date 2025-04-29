@@ -15,7 +15,6 @@ Copyright (C) 2025 AptS:1547
 # 3. 验证时，比较存储的Argon2(MD5(密码))与接收的MD5(密码)
 
 import logging
-import hashlib
 
 from typing import Dict, Optional, Any
 from argon2 import PasswordHasher
