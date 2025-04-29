@@ -30,7 +30,7 @@ async def get_device_list():
     """步获取设备列表"""
     headers = create_headers()
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(BASE_URL + f'/device/list?accessToken%3D{access_token}') as response:
+        async with session.get(BASE_URL + f'/device/list?accessToken%3D{settings.YUNJI_ACCESS_TOKEN}') as response:
             return json.loads(await response.text())
 
 
@@ -39,7 +39,7 @@ async def get_device_status(chassis_id):
     headers = create_headers()
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(
-                BASE_URL + f'/robot/{chassis_id}/status?accessToken%3D{access_token}') as response:
+                BASE_URL + f'/robot/{chassis_id}/status?accessToken%3D{settings.YUNJI_ACCESS_TOKEN}') as response:
             return json.loads(await response.text())
 
 
