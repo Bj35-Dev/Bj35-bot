@@ -15,6 +15,13 @@ logger = logging.getLogger(__name__)
 
 BASE_URL = 'https://open-api.yunjiai.cn/v3'
 
+# 初始化调度器
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.jobstores.memory import MemoryJobStore
+
+scheduler = AsyncIOScheduler(jobstores={'default': MemoryJobStore()})
+scheduler.start()
+
 
 def create_headers():
     """创建请求头，包含签名随机数、时间戳、访问密钥ID和访问令牌"""
@@ -175,6 +182,8 @@ async def get_device_by_id(cabin_id):
     """根据设备ID获取设备对象"""
     return {"id": cabin_id, "type": "robot"}
 
+# 任务状态跟踪字典
+task_status = {}
 
 async def check(cabin_id):
     """检查设备状态，判断是否开门或关门"""
@@ -186,6 +195,25 @@ async def check(cabin_id):
     elif status == ["CLOSE", "CLOSE"]:
         return "close"
 
+async def _check_status_and_proceed(job_id, cabin_id, chassis_id, location, max_retries=100):
+    """状态检查调度任务"""
+    if task_status.get(job_id, {}).get('retries', 0) >= max_retries:
+        task_status[job_id]['status'] = 'timeout'
+        scheduler.remove_job(job_id)
+        return
+
+    res = await check(cabin_id)
+    logger.debug(f'Job {job_id} check: {res}')
+
+    if res == "open":
+        task_status[job_id]['flag'] = True
+    elif res == "close" and task_status[job_id].get('flag', False):
+        task_status[job_id]['status'] = 'completed'
+        scheduler.remove_job(job_id)
+        logger.info(f'任务完成 设备ID: {cabin_id}, 位置: {location}')
+
+    task_status[job_id]['retries'] += 1
+
 
 async def run(locations, cabin_id):
     """执行任务流
@@ -196,7 +224,6 @@ async def run(locations, cabin_id):
     Returns:
         dict: 包含执行结果的状态码和消息
     """
-
     cabins = dict(settings.CABINS)
     chassis = dict(settings.CHASSIS)
     cabin_prefix = cabin_id[0:6]
@@ -219,34 +246,60 @@ async def run(locations, cabin_id):
             return {'code': 1, 'message': '位置列表不能为空'}
 
         logger.info('开始执行任务流，设备ID: %s, 位置列表: %s', cabin_id, locations)
-        # 执行每个位置的任务
         task_results = []
-        for idx, location in enumerate(locations):
-            logger.info('执行第 %d 个任务，目标位置: %s', idx + 1, location)
+
+        async def _execute_single_task(location):
+            """执行单个位置任务"""
+            job_id = str(uuid.uuid4())
+            task_status[job_id] = {
+                'status': 'pending',
+                'retries': 0,
+                'flag': False
+            }
+
             try:
-                # 获取设备对象
                 device = await get_device_by_id(cabin_id)
                 if not device:
                     raise ValueError(f"找不到设备ID: {cabin_id}")
-                # 执行任务
-                res = await (make_task_flow_dock_cabin_and_move_target_with_wait_action
-                             (cabin_id, chassis_id, location, 100))
-                flag = False  # 标记是否完成一次开门关门 关门为 False 开门为 True
+
+                # 提交主任务
+                res = await make_task_flow_dock_cabin_and_move_target_with_wait_action(
+                    cabin_id, chassis_id, location, 100)
                 task_results.append(res)
-                logger.info('位置 %s 任务执行结果: %s', location, res)
-                for i in range(100): # overtime 100s, 确保任务流执行成功
-                    res = await check(cabin_id)
-                    logger.debug('flag: %s, res: %s', flag, res)
-                    if res == "open":
-                        flag = True
-                    if res == "close" and flag is True:
-                        break
-                    await asyncio.sleep(1)
-                logger.info('code: 0, message: 任务%s执行成功 设备ID: %s, 位置: %s',
-                            idx + 1, cabin_id, location)
+
+                # 添加状态检查任务
+                scheduler.add_job(
+                    _check_status_and_proceed,
+                    'interval',
+                    seconds=1,
+                    args=(job_id, cabin_id, chassis_id, location),
+                    id=job_id
+                )
+
+                # 等待任务完成
+                while task_status[job_id]['status'] not in ('completed', 'timeout'):
+                    await asyncio.sleep(0.1)
+
+                if task_status[job_id]['status'] == 'timeout':
+                    raise TimeoutError(f"位置 {location} 任务超时")
+
+                logger.info('code: 0, message: 任务执行成功 设备ID: %s, 位置: %s', cabin_id, location)
+                return res
+
             except Exception as e:
                 logger.error("位置 %s 任务执行失败: %s", location, str(e))
+                raise
+            finally:
+                task_status.pop(job_id, None)
+
+        # 使用异步生成器执行任务序列
+        for idx, location in enumerate(locations):
+            logger.info('执行第 %d 个任务，目标位置: %s', idx + 1, location)
+            try:
+                await _execute_single_task(location)
+            except Exception as e:
                 return {'code': 1, 'message': f'任务执行失败: {str(e)}'}
+
 
     except Exception as e:
         logger.error('任务流执行失败: %s', str(e))
@@ -254,3 +307,11 @@ async def run(locations, cabin_id):
 
     await (make_task_flow_dock_cabin_and_move_target_with_wait_action
            (cabin_id, chassis_id, "charge_point_1F_40300716", 100))
+
+    # 关闭调度器时清理资源
+    def shutdown_scheduler():
+        if scheduler.running:
+            scheduler.shutdown()
+
+    import atexit
+    atexit.register(shutdown_scheduler)
