@@ -93,7 +93,7 @@ class WeComService:
         # 生成随机字符串作为 state 参数
         state = ''.join(random.choices(
             'abcdefghijklmnopqrstuvwxyz0123456789', k=16))
-        
+
         await RedisConnector.store_oauth_state(state)
 
         # 构建授权URL
@@ -137,8 +137,8 @@ class WeComService:
 
         # 4. 如果有user_ticket，获取敏感信息
         if user_info.get('user_ticket'):
-            sensitive_info = await (cls.__get_sensitive_info
-                                    (access_token, user_info.get('user_ticket')))
+            sensitive_info = await cls.__get_sensitive_info \
+                                    (access_token, user_info.get('user_ticket'))
             if sensitive_info:
                 user_detail.update(sensitive_info)
 

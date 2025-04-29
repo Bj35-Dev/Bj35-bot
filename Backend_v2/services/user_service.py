@@ -35,7 +35,7 @@ class UserService:
             wecom_id = data.get('wecom_id', 0)
             name = data.get('name', 'None')
             password = data.get('password', None)
-            
+
             ph = PasswordHasher()
             if password is None:
                 default_pwd = str(name) + str(wecom_id)
