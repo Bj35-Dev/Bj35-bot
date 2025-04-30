@@ -41,7 +41,7 @@ def register_routes(app):
             user_info = await UserService.get_userinfo_by_username(user[0], user[1])
 
             if not user_info:
-                logger.info(f"User {username} not found in database")
+                logger.warning(f"User {username} not found in database")
                 return jsonify(code=1, message="User not found")
 
             # 创建访问令牌，可选择添加更多声明
