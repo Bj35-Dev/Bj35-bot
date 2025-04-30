@@ -35,6 +35,8 @@ class Settings(BaseSettings):
 
     URI_PREFIX: str = Field(default='/api/v1')
 
+    LOG_LEVEL: str = Field(default="INFO")
+
     # 数据库配置
     DB_HOST: str = Field(default="localhost")
     DB_PORT: int = Field(default=5432)

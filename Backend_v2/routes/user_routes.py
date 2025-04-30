@@ -25,9 +25,9 @@ def register_routes(app):
     # @error_handler
     async def get_user_profile():
         username = request.args.get('username')
-        logger.info("username: %s", username)
+        logger.debug("username: %s", username)
         info = await UserService.get_userinfo_by_username(username, 'name')
-        logger.info("info: %s", info)
+        logger.debug("info: %s", info)
         return jsonify(info), 200
 
     @app.route(URI_PREFIX + '/post_user_profile', methods=['POST'])
@@ -47,7 +47,7 @@ def register_routes(app):
 
         # 根据API返回的数据进行处理
         if update_response['success']:
-            logger.info("Profile updated successfully!")
+            logger.info("%s updated profile successfully!", data['username'])
             return jsonify(
                 {'success': True, 'message': 'Profile updated successfully!'}), 200
         return jsonify(
@@ -62,7 +62,7 @@ def register_routes(app):
 
         # 根据API返回的数据进行处理
         if update_response['success']:
-            logger.info("Avatar updated successfully!")
+            logger.info("%s updated avatar successfully!", data['username'])
             return jsonify(
                 {'success': True, 'message': 'Profile updated successfully!'}), 200
         return jsonify(

@@ -41,7 +41,7 @@ def register_routes(app):
             user_info = await UserService.get_userinfo_by_username(user[0], user[1])
 
             if not user_info:
-                app.logger.error(f"User {username} not found in database")
+                logger.warning(f"User {username} not found in database")
                 return jsonify(code=1, message="User not found")
 
             # 创建访问令牌，可选择添加更多声明
@@ -54,9 +54,9 @@ def register_routes(app):
                     'role': user_info['department'],
                 }
             )
-            app.logger.info(f"User {username} logged in successfully")
+            logger.info(f"User {username} logged in successfully")
             return jsonify(code=0, access_token=access_token)
-        app.logger.error(f"User {username} login failed")
+        logger.warning(f"User {username} login failed")
         return jsonify(code=1, message="Invalid username or password")
 
 
@@ -65,7 +65,7 @@ def register_routes(app):
     async def wecom_auth():
         """获取企业微信OAuth授权URL"""
         oauth_url = await WeComService.get_oauth_url()
-        logger.info('Redirecting to WeCom OAuth URL: %s', oauth_url)
+        logger.debug('Redirecting to WeCom OAuth URL: %s', oauth_url)
         return redirect(oauth_url)
 
 
@@ -76,14 +76,14 @@ def register_routes(app):
         state = request.args.get('state')
 
         if not code or not state:
-            app.logger.error("Missing code or state in WeChat Work OAuth callback")
+            logger.error("Missing code or state in WeChat Work OAuth callback")
             return redirect(settings.WECOM_FRONTEND_URL + '/login?error=missing_parameters')
 
         # 获取用户信息
         user_info = await WeComService.get_user_info(code, state)
 
         if not user_info or not user_info.get('userid'):
-            app.logger.error("Failed to get user info from WeChat Work")
+            logger.error("Failed to get user info from WeChat Work")
             return redirect(settings.WECOM_FRONTEND_URL + '/login?error=auth_failed')
 
         # 检查用户是否存在，如果不存在则创建
@@ -115,5 +115,5 @@ def register_routes(app):
         )
 
         # 重定向到前端，带上token
-        app.logger.info(f"User {user_info.get('name')} logged in via WeChat Work OAuth")
+        logger.info(f"User {user_info.get('name')} logged in via WeChat Work OAuth")
         return redirect(settings.WECOM_FRONTEND_URL + f"/login?token={access_token}")
