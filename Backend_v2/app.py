@@ -12,6 +12,8 @@ Copyright (C) 2025 AptS:1547
 import sys
 import logging
 
+import colorlog
+
 from quart import Quart
 from quart_cors import cors
 from quart_jwt_extended import JWTManager
@@ -30,12 +32,22 @@ from routes import register_all_routes
 def configure_logging():
     """配置日志系统"""
     # 创建日志格式器
-    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    formatter = logging.Formatter(log_format)
+    color_formatter = colorlog.ColoredFormatter(
+        "%(cyan)s[%(asctime)s]%(reset)s %(log_color)s[%(levelname)s]%(reset)s "
+        "%(purple)s[%(name)s:%(filename)s:%(lineno)d]%(reset)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        log_colors={
+            'DEBUG': 'blue',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'bold_red',
+        }
+    )
 
     # 创建控制台处理器
     console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
+    console_handler.setFormatter(color_formatter)
 
     # 配置根日志记录器
     root_logger = logging.getLogger()
