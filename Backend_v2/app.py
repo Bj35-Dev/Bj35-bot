@@ -39,8 +39,11 @@ def configure_logging():
 
     # 配置根日志记录器
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)  # 设置日志级别
+    log_level = logging.getLevelNamesMapping().get(settings.LOG_LEVEL, logging.INFO)
+    root_logger.setLevel(log_level)
     root_logger.addHandler(console_handler)
+
+    root_logger.info("日志系统已配置，当前日志级别: %s", settings.LOG_LEVEL)
 
 
 def create_app():
