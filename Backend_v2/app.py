@@ -39,7 +39,11 @@ def configure_logging():
 
     # 配置根日志记录器
     root_logger = logging.getLogger()
-    log_level = logging.getLevelNamesMapping().get(settings.LOG_LEVEL, logging.INFO)
+    try:
+        log_level = logging.getLevelNamesMapping().get(settings.LOG_LEVEL, logging.INFO)
+    except ValueError:
+        log_level = logging.INFO # Default to INFO if the LOG_LEVEL is invalid
+        root_logger.warning(f"Invalid LOG_LEVEL '{settings.LOG_LEVEL}'. Using INFO level.")
     root_logger.setLevel(log_level)
     root_logger.addHandler(console_handler)
 
