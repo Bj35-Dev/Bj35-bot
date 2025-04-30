@@ -56,7 +56,7 @@ def register_routes(app):
             )
             logger.info(f"User {username} logged in successfully")
             return jsonify(code=0, access_token=access_token)
-        logger.info(f"User {username} login failed")
+        logger.warning(f"User {username} login failed")
         return jsonify(code=1, message="Invalid username or password")
 
 
