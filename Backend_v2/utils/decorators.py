@@ -18,7 +18,7 @@ def error_handler(func):
             response = await func(*args, **kwargs)
             if isinstance(response, dict):
                 response_json = response
-                if response_json.get('code') == 11013:
+                if response_json.get('code') == 11012:
                     logger.error("Authentication failed in %s : %s",func.__name__,response_json)
                     await TokenManager.get_valid_token()
                     return jsonify(response_json), response.get('status_code', 500)
