@@ -84,7 +84,7 @@ async function validateToken(token) {
     
     if (isValid) {
       NotificationService.notify('企业微信登录成功', 'success')
-      router.push('/')
+      window.location.href = '/'
     } else {
       NotificationService.notify('登录凭据无效或已过期', 'error')
     }
