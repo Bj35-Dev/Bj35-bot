@@ -115,5 +115,5 @@ def register_routes(app):
         )
 
         # 重定向到前端，带上token
-        logger.info(f"User {user_info.get('name')} logged in via WeChat Work OAuth")
+        logger.info("User %s logged in via WeCom", user_info.get('name'))
         return redirect(settings.WECOM_FRONTEND_URL + f"/login?token={access_token}")
