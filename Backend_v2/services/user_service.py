@@ -9,11 +9,6 @@ Copyright (C) 2025 AptS:1547
 本文件定义了UserService类，处理与用户相关的所有业务逻辑。
 """
 
-# 特殊说明：本系统的密码处理流程是：
-# 1. 前端发送MD5哈希后的密码
-# 2. 后端使用Argon2对MD5哈希进行二次哈希后存储
-# 3. 验证时，比较存储的Argon2(MD5(密码))与接收的MD5(密码)
-
 import logging
 
 from typing import Dict, Optional, Any

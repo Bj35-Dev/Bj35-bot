@@ -5,7 +5,7 @@ This file contains the routes for the robot devices.
 from quart import jsonify
 from quart_jwt_extended import jwt_required
 
-from utils import yunji_api
+from services import yunji_api
 from utils import error_handler
 
 from settings import settings

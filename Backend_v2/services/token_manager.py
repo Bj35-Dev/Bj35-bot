@@ -10,18 +10,21 @@ Copyright (C) 2025 AptS:1547
 """
 import logging
 import json
+import uuid
+import hmac
+import hashlib
+import base64
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
 
 import yaml
+import aiohttp
 from filelock import FileLock
 from cryptography.fernet import Fernet
 
 from settings import settings
 from utils.exceptions import UpdateTokenError, TokenNotFoundError
-
-from .access_token import update_access_token
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +95,54 @@ class TokenManager:
             return False
 
     @classmethod
+    async def _get_access_token(cls, access_key_id, access_key_secret):
+        """This function sends a request to obtain an accessToken from YunJi."""
+        timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%S+08:00')
+        signature_nonce = str(uuid.uuid4())
+        params = {
+            "signatureNonce": signature_nonce,
+            "accessKeyId": access_key_id,
+            "timestamp": timestamp,
+        }
+
+        sorted_params = sorted(params.items())
+        canonical_string = "&".join(["%s=%s" % (key, value) for key, value in sorted_params])
+        message = canonical_string.encode('utf-8')
+        key = (access_key_secret + "&").encode('utf-8')
+        signature = hmac.new(key, message, hashlib.sha1).digest()
+        params["signature"] = base64.b64encode(signature).decode('utf-8')
+
+        url = "https://open-api.yunjiai.cn/v3/auth/accessToken"
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=params) as response:
+                response_json = await response.json()
+                if response_json["code"] == 0:
+                    logger.debug("Obtained accessToken: %s", response_json["data"]["accessToken"])
+                    logger.debug("Token expiration time: %s", response_json["data"]["expiration"])
+                    return response_json
+                raise UpdateTokenError(f"Failed to obtain accessToken: {response_json['message']}")
+
+    @classmethod
+    async def _update_access_token(cls) -> tuple[str, str]:
+        """
+        更新access token
+        
+        Args:
+            access_token: 新的access token
+        """
+        access_key_id = settings.YUNJI_ACCESS_KEY_ID
+        access_key_secret = settings.YUNJI_SECRET_KEY
+        data = await cls._get_access_token(access_key_id, access_key_secret)
+        if data["code"] == 0:
+            access_token = data["data"]["accessToken"]
+            expiration = data["data"]["expiration"]
+
+            return access_token, expiration
+
+        raise UpdateTokenError(f"Failed to obtain accessToken: {data['msg']}")
+
+    @classmethod
     def load_token_data(cls) -> Optional[Dict[str, Any]]:
         """
         从文件加载token数据
@@ -138,7 +189,7 @@ class TokenManager:
 
                 try:
                     # 尝试更新token
-                    access_token, expiration = await update_access_token()
+                    access_token, expiration = await cls._update_access_token()
                 except UpdateTokenError as e:
                     logger.error("更新access token失败: %s", str(e))
                     return False
@@ -164,7 +215,7 @@ class TokenManager:
 
                 try:
                     # 尝试更新token
-                    access_token, expiration = await update_access_token()
+                    access_token, expiration = await cls._update_access_token()
 
                     logger.info("新的access token生成成功")
 
