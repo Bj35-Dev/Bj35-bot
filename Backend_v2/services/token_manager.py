@@ -14,6 +14,7 @@ import uuid
 import hmac
 import hashlib
 import base64
+from functools import lru_cache
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
@@ -41,6 +42,7 @@ class TokenManager:
         cls.TOKEN_DIR.mkdir(parents=True, exist_ok=True)
 
     @classmethod
+    @lru_cache(maxsize=1)
     def _get_encryption_key(cls) -> bytes:
         """获取用于加密的密钥"""
         key = str(settings.DATA_ENCRYPTION_KEY)
@@ -95,8 +97,18 @@ class TokenManager:
             return False
 
     @classmethod
+    def _generate_signature(cls, params, secret_key):
+        """生成API请求签名"""
+        sorted_params = sorted(params.items())
+        canonical_string = "&".join(["%s=%s" % (key, value) for key, value in sorted_params])
+        message = canonical_string.encode('utf-8')
+        key = (secret_key + "&").encode('utf-8')
+        signature = hmac.new(key, message, hashlib.sha1).digest()
+        return base64.b64encode(signature).decode('utf-8')
+
+    @classmethod
     async def _get_access_token(cls, access_key_id, access_key_secret):
-        """This function sends a request to obtain an accessToken from YunJi."""
+        """获取access token"""
         timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%S+08:00')
         signature_nonce = str(uuid.uuid4())
         params = {
@@ -105,12 +117,7 @@ class TokenManager:
             "timestamp": timestamp,
         }
 
-        sorted_params = sorted(params.items())
-        canonical_string = "&".join(["%s=%s" % (key, value) for key, value in sorted_params])
-        message = canonical_string.encode('utf-8')
-        key = (access_key_secret + "&").encode('utf-8')
-        signature = hmac.new(key, message, hashlib.sha1).digest()
-        params["signature"] = base64.b64encode(signature).decode('utf-8')
+        params["signature"] = cls._generate_signature(params, access_key_secret)
 
         url = "https://open-api.yunjiai.cn/v3/auth/accessToken"
 
@@ -125,12 +132,7 @@ class TokenManager:
 
     @classmethod
     async def _update_access_token(cls) -> tuple[str, str]:
-        """
-        更新access token
-        
-        Args:
-            access_token: 新的access token
-        """
+        """更新 access token 并返回token和过期时间"""
         access_key_id = settings.YUNJI_ACCESS_KEY_ID
         access_key_secret = settings.YUNJI_SECRET_KEY
         data = await cls._get_access_token(access_key_id, access_key_secret)
