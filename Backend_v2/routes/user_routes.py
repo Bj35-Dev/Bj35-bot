@@ -24,7 +24,7 @@ def register_routes(app):
     @jwt_required
     # @error_handler
     async def get_user_profile():
-        username = request.args.get('username')
+        username = request.args.get('username', '')
         logger.debug("username: %s", username)
         info = await UserService.get_userinfo_by_username(username, 'name')
         logger.debug("info: %s", info)

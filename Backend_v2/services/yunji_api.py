@@ -3,8 +3,8 @@
 This module provides functions to interact with Yunji's API.
 """
 import uuid
-import time
 import json
+from datetime import datetime
 import logging
 import asyncio
 import aiohttp
@@ -20,7 +20,7 @@ def create_headers():
     """创建请求头，包含签名随机数、时间戳、访问密钥ID和访问令牌"""
     signature_nonce = str(uuid.uuid4())
     headers = {'signatureNonce': signature_nonce,
-               'timestamp': str(time.strftime('%Y-%m-%dT%H:%M:%S+08:00', time.gmtime())),
+               'timestamp': datetime.now().strftime('%Y-%m-%dT%H:%M:%S+08:00'),
                'accessKeyId': settings.YUNJI_ACCESS_KEY_ID,
                'token': str(settings.YUNJI_ACCESS_TOKEN)}
     return headers

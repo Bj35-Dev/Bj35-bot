@@ -16,14 +16,12 @@ from .jwt_handlers import configure_jwt_handlers
 
 from .decorators import error_handler
 
-from . import yunji_api, exceptions
+from . import exceptions
 
 __all__ = [
     'PostgreSQLConnector', 'RedisConnector',
 
     'configure_jwt_handlers', 'error_handler',
-
-    'yunji_api',
 
     'exceptions'
 ]
