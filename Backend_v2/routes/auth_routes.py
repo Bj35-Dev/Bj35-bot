@@ -13,6 +13,8 @@ from quart_jwt_extended import create_access_token
 
 from services import UserService, WeComService
 
+from pypinyin import pinyin, Style
+
 from settings import settings
 
 logger = logging.getLogger(__name__)
@@ -91,11 +93,19 @@ def register_routes(app):
         user_exists = await UserService.check_user_exists_by_wecom(user_info.get('userid'))
 
         if not user_exists:
+            name = user_info.get('name')
+            # 使用 pinyin 函数获取拼音，style=Style.NORMAL 表示获取普通拼音
+            pinyin_list = pinyin(name, style=Style.NORMAL)
+            # 提取每个汉字拼音的首字母
+            initials = ''.join([word[0][0].upper() for word in pinyin_list])
+            # 生成默认密码（教室姓名首字母大写+教师号）
+            password = initials + str(user_info.get('userid'))
             # 添加用户到数据库
             await UserService.add_user({
                 'wecom': user_info.get('wecom', ''),
                 'wecom_id': user_info.get('userid'),
-                'name': user_info.get('name'),
+                'name': name,
+                'password': password,
                 'department': ','.join(map(str, user_info.get('department', []))),
                 'position': user_info.get('position', ''),
                 'mobile': user_info.get('mobile', ''),
