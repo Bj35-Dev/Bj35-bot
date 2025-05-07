@@ -67,3 +67,53 @@ def register_routes(app):
                 {'success': True, 'message': 'Profile updated successfully!'}), 200
         return jsonify(
         {'success': False, 'message': update_response['message']}), 400
+
+    @app.route(URI_PREFIX + '/update_user_password', methods=['POST'])
+    @error_handler
+    @jwt_required
+    async def update_user_password():
+        data = await request.json
+        wecom_id = data.get('wecom_id')
+        old_password = data.get('old_password')
+        new_password = data.get('new_password')
+
+        if not all([wecom_id, old_password, new_password]):
+            return jsonify({
+                'success': False,
+                'message': '缺少必要参数'
+            }), 422
+
+        # 先验证原密码是否正确
+        try:
+            stored_password = await UserService.get_password_by_username(wecom_id, 'wecom_id')
+            if stored_password != old_password:
+                logger.warning("用户 %s 原密码验证失败", wecom_id)
+                return jsonify({
+                    'success': False,
+                    'message': '原密码不正确'
+                }), 400
+
+            # 更新新密码
+            update_response = await UserService.update_userinfo({
+                'wecom_id': wecom_id,
+                'password': new_password
+            })
+
+            if update_response['success']:
+                logger.info("用户 %s 密码更新成功", wecom_id)
+                return jsonify({
+                    'success': True,
+                    'message': '密码更新成功'
+                }), 200
+
+            return jsonify({
+                'success': False,
+                'message': '密码更新失败'
+            }), 400
+
+        except Exception as e:
+            logger.error("密码更新失败: %s", str(e))
+            return jsonify({
+                'success': False,
+                'message': '密码更新失败'
+            }), 500

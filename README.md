@@ -48,8 +48,8 @@
 ## 技术栈
 
 - 前端：Vite + Vue3
-- 后端：Python Flask
-- 数据库：SQLite
+- 后端：Python Quart
+- 数据库：PostgreSQL
 
 ## 快速开始
 
