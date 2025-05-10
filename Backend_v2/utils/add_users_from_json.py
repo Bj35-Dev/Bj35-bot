@@ -1,6 +1,51 @@
+"""
+JSON数据格式示例：
+[
+    {
+        "errcode": 0,
+        "errmsg": "ok",
+        "userid": "1290",
+        "name": "杨关",
+        "department": [2, 28, 73],
+        "position": "",
+        "status": 1,
+        "isleader": 0,
+        "extattr": {
+            "attrs": [
+                {
+                    "name": "身份证号",
+                    "value": "",
+                    "type": 0,
+                    "text": {"value": ""}
+                },
+                {
+                    "name": "物理卡号",
+                    "value": "4219393059",
+                    "type": 0,
+                    "text": {"value": "4219393059"}
+                },
+                {
+                    "name": "英文名",
+                    "value": "",
+                    "type": 0,
+                    "text": {"value": ""}
+                }
+            ]
+        },
+        "english_name": "1290",
+        "telephone": "",
+        "enable": 1,
+        "hide_mobile": 0,
+        "main_department": 2,
+        "alias": "1290"
+    }
+]
+"""
+
 import json
 from typing import List, Dict
 
+# 以下是原有代码
 import asyncio
 import logging
 from typing import Dict, Any
