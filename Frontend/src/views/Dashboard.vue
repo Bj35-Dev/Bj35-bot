@@ -289,7 +289,6 @@ function handleResize() {
 onMounted(async () => {
   username.value = AuthService.getUsername()
   useravatar.value = await ApiServices.getUserAvatar()
-  console.log(username.value, useravatar.value)
   window.addEventListener('resize', handleResize)
   await setActiveView(navigation[0])
 })

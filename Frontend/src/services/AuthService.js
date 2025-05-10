@@ -55,6 +55,7 @@ class AuthService {
     try {
       // 解码JWT获取用户信息
       const decoded = jwtDecode(token);
+      console.log('Decoded token:');
       console.log(decoded);
       return decoded;
     } catch (error) {
@@ -65,7 +66,12 @@ class AuthService {
 
   getUsername() {
     const userInfo = this.getUserInfo();
-    return userInfo ? userInfo.sub : null;
+    return userInfo ? userInfo.user_claims.username : null;
+  }
+
+  getUserWecomId() {
+    const userInfo = this.getUserInfo();
+    return userInfo ? userInfo.user_claims.wecom_id : null;
   }
 
   getUserAvatar() {

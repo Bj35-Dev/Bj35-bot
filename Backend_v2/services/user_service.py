@@ -66,10 +66,11 @@ class UserService:
                         WHEN name = $1 THEN 'name'
                         WHEN email = $1 THEN 'email'
                         WHEN mobile = $1 THEN 'mobile'
+                        WHEN wecom_id = $1 THEN 'wecom_id'
                     END as kind,
                     password
                 FROM userinfo
-                WHERE wecom = $1 OR name = $1 OR email = $1 OR mobile = $1
+                WHERE wecom = $1 OR name = $1 OR email = $1 OR mobile = $1 OR wecom_id = $1
                 LIMIT 1
             """, username)
 
@@ -96,7 +97,7 @@ class UserService:
     @staticmethod
     async def get_password_by_username(username: str, kind: str) -> Optional[str]:
         """根据用户名获取密码"""
-        allowed_columns = ['wecom', 'name', 'email', 'mobile']
+        allowed_columns = ['wecom', 'name', 'email', 'mobile', 'wecom_id']
         if kind not in allowed_columns:
             logger.error("无效的列名: %s", kind)
             raise ValueError(f"无效的列名: {kind}")
@@ -133,32 +134,48 @@ class UserService:
     @staticmethod
     async def update_userinfo(data: Dict[str, Any]) -> Dict[str, bool]:
         """更新用户信息"""
-        if 'name_old' not in data:
-            raise ValueError("缺少必要的 'name_old' 字段")
-
-        name = data['name_old']
-        if len(data) < 2:
-            raise ValueError("没有提供要更新的字段")
-
-        # 获取第一个不是 'name_old' 的键作为要更新的字段
-        update_kind = next((k for k in data.keys() if k != 'name_old'), None)
-        if not update_kind:
-            raise ValueError("没有提供要更新的字段")
-
-        value = data[update_kind]
-
-        # 验证更新的列名以防止SQL注入
-        allowed_columns = ['wecom', 'wecom_id', 'name', 'password', 'department',
-                           'position', 'mobile', 'language', 'email', 'avatar_text']
-        if update_kind not in allowed_columns:
-            logger.error("无效的列名: %s", update_kind)
-            raise ValueError(f"无效的列名: {update_kind}")
-
         try:
-            query = f"UPDATE userinfo SET {update_kind} = $1 WHERE name = $2"
-            await PostgreSQLConnector.execute(query, value, name)
-            logger.info("已更新用户信息: %s", {update_kind: value, 'name': name})
-            return {"success": True}
+            name_old = data.get('name_old', '')
+            updates = []
+            values = []
+            param_index = 1
+
+            # 处理密码更新
+            if 'password' in data:
+                ph = PasswordHasher()
+                hashed_password = ph.hash(data['password'])
+                updates.append(f"password = ${param_index}")
+                values.append(hashed_password)
+                param_index += 1
+
+            # 构建更新SQL
+            if not updates:
+                return {'success': True}
+
+            # 修改查询条件，使用 wecom_id
+            sql = f"""
+                UPDATE userinfo
+                SET {', '.join(updates)}
+                WHERE wecom_id = ${param_index}
+                RETURNING *
+            """
+            values.append(name_old)
+
+            result = await PostgreSQLConnector.fetch_one(sql, *values)
+            if result:
+                logger.info("已更新用户信息: %s", {
+                    'name': result.get('name'),
+                    'wecom_id': result.get('wecom_id')
+                })
+                return {'success': True}
+            return {
+                'success': False,
+                'message': '未找到用户'
+            }
+
         except Exception as e:
             logger.error("更新用户信息失败: %s", str(e))
-            raise
+            return {
+                'success': False,
+                'message': str(e)
+            }

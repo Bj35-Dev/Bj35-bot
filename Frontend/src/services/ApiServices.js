@@ -222,6 +222,25 @@ class ApiServices extends ApiPrefix {
         throw error;
       }
     }
+
+    async changeUserPassword(data) {
+      try {
+        const response = await this.post('/change-password', {
+          wecom_id: data.wecom_id,
+          old_password: data.old_password,
+          new_password: data.new_password
+        });
+
+        if (!response.success) {
+          throw new Error(response.message || '密码修改失败');
+        }
+
+        return response;
+      } catch (error) {
+        console.error('修改密码请求失败:', error);
+        throw error;
+      }
+    }
 }
 
 export default new ApiServices();

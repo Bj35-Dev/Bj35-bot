@@ -1,102 +1,125 @@
-<!-- /profile/change_password.vue -->
 <template>
   <div class="max-w-7xl lg:px-16 pt-16">
-    <h1 class="sr-only">Change Password</h1>
-    <main class="px-4 py-16 sm:px-0 lg:px-0 lg:py-20">
+    <div class="px-4 py-16 sm:px-0 lg:px-0 lg:py-20">
       <div class="mx-auto max-w-2xl space-y-16 sm:space-y-20">
         <div>
-          <h2 class="text-base font-semibold text-gray-900">Change Password</h2>
-          <form @submit.prevent="changePassword">
-            <div class="mt-6 divide-y divide-gray-100 border-t border-gray-200 text-sm">
-              <div class="py-6 sm:flex">
-                <dt class="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Current Password</dt>
-                <dd class="mt-1 flex justify-between gap-x-6 sm:mt-0 sm:flex-auto">
-                  <input
-                    type="password"
-                    v-model="currentPassword"
-                    class="border border-gray-300 rounded p-1 flex-1"
-                    required
-                  />
-                </dd>
-              </div>
-              <div class="py-6 sm:flex">
-                <dt class="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">New Password</dt>
-                <dd class="mt-1 flex justify-between gap-x-6 sm:mt-0 sm:flex-auto">
-                  <input
-                    type="password"
-                    v-model="newPassword"
-                    class="border border-gray-300 rounded p-1 flex-1"
-                    required
-                  />
-                </dd>
-              </div>
-              <div class="py-6 sm:flex">
-                <dt class="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Confirm New Password</dt>
-                <dd class="mt-1 flex justify-between gap-x-6 sm:mt-0 sm:flex-auto">
-                  <input
-                    type="password"
-                    v-model="confirmNewPassword"
-                    class="border border-gray-300 rounded p-1 flex-1"
-                    required
-                  />
-                </dd>
-              </div>
-              <div class="py-6 sm:flex">
-                <dt class="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6"></dt>
-                <dd class="mt-1 flex justify-between gap-x-6 sm:mt-0 sm:flex-auto">
-                  <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded">Change Password</button>
-                </dd>
-              </div>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-base font-semibold text-gray-900">修改密码</h2>
+            <button
+              @click="goBack"
+              class="text-sm text-indigo-600 hover:text-indigo-500"
+            >
+              返回
+            </button>
+          </div>
+
+          <form @submit.prevent="handlePasswordChange" class="mt-6 space-y-6">
+            <div class="border-t border-gray-100">
+              <dl class="divide-y divide-gray-100">
+                <div class="py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+                  <dt class="text-sm font-medium text-gray-900">当前密码</dt>
+                  <dd class="mt-1 sm:col-span-2 sm:mt-0">
+                    <input
+                      type="password"
+                      v-model="currentPassword"
+                      class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      required
+                    />
+                  </dd>
+                </div>
+
+                <div class="py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+                  <dt class="text-sm font-medium text-gray-900">新密码</dt>
+                  <dd class="mt-1 sm:col-span-2 sm:mt-0">
+                    <input
+                      type="password"
+                      v-model="newPassword"
+                      class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      required
+                    />
+                  </dd>
+                </div>
+
+                <div class="py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+                  <dt class="text-sm font-medium text-gray-900">确认新密码</dt>
+                  <dd class="mt-1 sm:col-span-2 sm:mt-0">
+                    <input
+                      type="password"
+                      v-model="confirmPassword"
+                      class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      required
+                    />
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div class="flex justify-start gap-x-3">
+              <button
+                type="submit"
+                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                :disabled="isSubmitting"
+              >
+                {{ isSubmitting ? '提交中...' : '更新密码' }}
+              </button>
             </div>
           </form>
         </div>
       </div>
-    </main>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import AuthService from '@/services/AuthService.js'
-import ApiServices from "@/services/ApiServices.js"
 import { useRouter } from 'vue-router'
+import ApiServices from '@/services/ApiServices'
+import AuthService from '@/services/AuthService'
+import NotificationService from '@/services/NotificationService'
 
 const router = useRouter()
-
 const currentPassword = ref('')
 const newPassword = ref('')
-const confirmNewPassword = ref('')
+const confirmPassword = ref('')
+const isSubmitting = ref(false)
 
-async function changePassword() {
-  if (newPassword.value !== confirmNewPassword.value) {
-    alert("New password and confirm new password do not match.")
+function goBack() {
+  router.back()
+}
+
+async function handlePasswordChange() {
+  if (newPassword.value !== confirmPassword.value) {
+    NotificationService.notify('两次输入的新密码不一致', 'error')
     return
   }
 
+  isSubmitting.value = true
+
   try {
     const response = await ApiServices.changeUserPassword({
-      currentPassword: currentPassword.value,
-      newPassword: newPassword.value
+      wecom_id: AuthService.getUserWecomId(),
+      old_password: currentPassword.value,
+      new_password: newPassword.value
     })
-
+    console.log('密码修改成功:', response.data)
+    console.log('token:', response)
     if (response.success) {
-      alert('Password changed successfully!');
-      AuthService.logout()
-      await router.push('/login')
+      NotificationService.notify('密码修改成功，请重新登录', 'success')
+      setTimeout(() => {
+        AuthService.logout()
+        router.push('/login')
+      }, 1500)
     } else {
-      alert(`Failed to change password. Reason: ${response.message}`)
+      NotificationService.notify(response.message || '密码修改失败', 'error')
     }
   } catch (error) {
-    console.error('Error changing password:', error);
-    alert('Error changing password. Please try again.');
+    console.error('密码修改失败:', error)
+    NotificationService.notify(error.response?.message || '系统错误，请稍后重试', 'error')
   } finally {
+    isSubmitting.value = false
     currentPassword.value = ''
     newPassword.value = ''
-    confirmNewPassword.value = ''
+    confirmPassword.value = ''
   }
 }
 </script>
-
-<style scoped>
-/* 你可以在这里添加特定的样式，但这里保持与现有UI一致 */
-</style>
