@@ -179,7 +179,13 @@ async def get_device_by_id(cabin_id):
     return {"id": cabin_id, "type": "robot"}
 
 
-async def check_lockers(cabin_id):
+# 充电桩位置常量
+CHARGE_POINTS = {
+    "1F": "charge_point_1F_40300716",
+    "3F": "charge_point_3F_40300696"
+}
+
+async def check_lockers_status(cabin_id):
     """检查设备状态，判断是否开门或关门"""
     res = await get_device_status(cabin_id)
     status = [res["data"]["deviceStatus"]["lockers"][0]["status"],
@@ -189,12 +195,38 @@ async def check_lockers(cabin_id):
     elif status == ["CLOSE", "CLOSE"]:
         return "close"
 
-async def check_position(device_id):
-    # 注意这个是device_id不是cabin_id（最屎山的一集）
-    # currentPositionMarker是可以表示当前目标位置的（细分的具体目标地点，而不是back封装之后一直是chargepoint不变）
-    # 相反，get_cabin_position在back封装后只会显示chargepoint
-    res = await get_device_status(device_bot1_chassis)
+async def check_position(chassis_id):
+    """获取设备当前位置标记
+    Args:
+        chassis_id: 底盘设备ID
+        
+    Returns:
+        str: 当前设备位置标记
+    """
+    res = await get_device_status(chassis_id)
     return res["data"]["deviceStatus"]["currentPositionMarker"]
+
+async def _check_door_status(cabin_id: str, flag: bool) -> tuple[bool, str | None]:
+    """检查门状态并更新标志位
+    Args:
+        cabin_id: 设备ID
+        flag: 当前开门状态标志位
+        
+    Returns:
+        tuple[是否更新标志位, 错误信息]
+    """
+    status = await check_lockers_status(cabin_id)
+    if status == "open":
+        return True, None
+    elif status == "close" and flag:
+        return False, None
+    return flag, None  # 保持原状态
+
+
+def _is_at_charge_point(position: str) -> bool:
+    """判断是否处于充电桩位置"""
+    return position in CHARGE_POINTS.values()
+
 
 async def run(locations, cabin_id):
     """执行任务流
@@ -243,22 +275,23 @@ async def run(locations, cabin_id):
                 logger.info('位置 %s 任务执行结果: %s', location, res)
                 
                 while True:
-                    # 任务启动大概0.3~0.5s，但是api延迟是毫秒级的，所以需要等待1s
-                    await asyncio.sleep(1) # 相当于do while
-
-                    res = await check(cabin_id)
-                    position = await check_position(cabin_id)
-
-                    logger.debug('flag: %s, res: %s', flag, res)
-                    logger.debug('position: %s', position)
-
-                    if res == "open":
-                        flag = True
-                    elif res == "close" and flag is True:
-                        break
-                    elif flag is False and (pos=="charge_point_1F_40300716" 
-                                 or pos=="charge_point_3F_40300696"):
+                    await asyncio.sleep(1)
+                    
+                    position = await check_position(chassis_id)
+                    flag, error = await _check_door_status(cabin_id, flag)
+                    
+                    if error:
+                        return {'code': 1, 'message': error}
+                        
+                    logger.debug('门状态标志: %s, 当前位置: %s', flag, position)
+                    
+                    if not flag and _is_at_charge_point(position):
+                        logger.warning('检测到未开门状态下处于充电桩位置: %s', position)
                         return {'code': 1, 'message': '仓门未打开，返回默认充电桩'}
+                        
+                    if flag and await check_lockers(cabin_id) == "close":
+                        logger.info('检测到完成一次开门-关门循环')
+                        break
                 
                 logger.info('code: 0, message: 任务%s执行成功 设备ID: %s, 位置: %s',
                             idx + 1, cabin_id, location)
