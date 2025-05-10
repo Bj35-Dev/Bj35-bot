@@ -23,7 +23,11 @@ class UserService:
 
     @staticmethod
     async def add_user(data: Dict[str, Any]) -> Dict[str, bool]:
-        """添加用户信息"""
+        """
+        添加用户信息
+
+        注意：此方法会将密码进行哈希处理后存储到数据库中。
+        """
         try:
             wecom = data.get('wecom', 'None')
             wecom_id = data.get('wecom_id', 0)
@@ -31,11 +35,11 @@ class UserService:
             password = data.get('password', None)
 
             ph = PasswordHasher()
-            if password is None:
-                default_pwd = str(name) + str(wecom_id)
-                password = ph.hash(default_pwd)
-            else:
-                password = ph.hash(password)
+
+            if not password:
+                raise ValueError("密码不能为空")
+
+            password = ph.hash(password)
 
             department = data.get('department', 'None')
             position = data.get('position', 'B312')
