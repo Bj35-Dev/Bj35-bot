@@ -195,7 +195,7 @@ async def check_lockers_status(cabin_id):
     elif status == ["CLOSE", "CLOSE"]:
         return "close"
 
-async def check_position(chassis_id):
+async def get_current_position_marker(chassis_id):
     """获取设备当前位置标记
     Args:
         chassis_id: 底盘设备ID
@@ -277,7 +277,7 @@ async def run(locations, cabin_id):
                 while True:
                     await asyncio.sleep(1)
                     
-                    position = await check_position(chassis_id)
+                    position = await get_current_position_marker(chassis_id)
                     flag, error = await _check_door_status(cabin_id, flag)
                     
                     if error:
@@ -305,5 +305,7 @@ async def run(locations, cabin_id):
 
     # back回返回默认充电桩，在执行完最后一个任务后再执行一个回到原地的任务
     # 触发back后会自动回到默认充电桩，省去的调env的复杂结构
+    # 使用最后一个位置，以便在任务完成后返回到任务的起点
+    # 10s是一个经验值，并且在其他功能中不会用到，所以直接写死
     await (make_task_flow_dock_cabin_and_move_target_with_wait_action
            (cabin_id, chassis_id, locations[-1], 10))
