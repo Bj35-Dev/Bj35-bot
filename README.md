@@ -7,16 +7,16 @@
 </p>
 
 <p align="center">
-  <a href="https://www.codefactor.io/repository/github/cg8-5712/Bj35-bot/">
-    <img src="https://www.codefactor.io/repository/github/cg8-5712/Bj35-bot/badge" alt="CodeFactor" />
+  <a href="https://www.codefactor.io/repository/github/Bj35-Dev/Bj35-bot/">
+    <img src="https://www.codefactor.io/repository/github/Bj35-Dev/Bj35-bot/badge" alt="CodeFactor" />
   </a>
 
-  <a href="https://github.com/cg8-5712/Bj35-bot/activity">
-    <img src="https://img.shields.io/github/last-commit/cg8-5712/Bj35-bot/main" alt="Last Commit"/>
+  <a href="https://github.com/Bj35-Dev/Bj35-bot/activity">
+    <img src="https://img.shields.io/github/last-commit/Bj35-Dev/Bj35-bot/main" alt="Last Commit"/>
   </a>
 
   <a href="./LICENSE">
-    <img src="https://img.shields.io/github/license/cg8-5712/Bj35-bot" alt="GPL-3.0\"/>
+    <img src="https://img.shields.io/github/license/Bj35-Dev/Bj35-bot" alt="GPL-3.0\"/>
   </a>
 </p>
 
