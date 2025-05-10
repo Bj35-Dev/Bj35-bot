@@ -64,7 +64,10 @@ async def get_school_tasks(page_size, current):
 
 
 async def get_cabin_position(cabin_id):
-    """异步获取指定设备的仓位位置"""
+    """
+    异步获取指定设备的仓位位置
+    注意：执行back时无论发到哪里都只会显示chargepoint
+    """
     headers = create_headers()
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(BASE_URL + f'/robot/{cabin_id}/position') as response:
@@ -176,7 +179,7 @@ async def get_device_by_id(cabin_id):
     return {"id": cabin_id, "type": "robot"}
 
 
-async def check(cabin_id):
+async def check_lockers(cabin_id):
     """检查设备状态，判断是否开门或关门"""
     res = await get_device_status(cabin_id)
     status = [res["data"]["deviceStatus"]["lockers"][0]["status"],
@@ -186,6 +189,12 @@ async def check(cabin_id):
     elif status == ["CLOSE", "CLOSE"]:
         return "close"
 
+async def check_position(device_id):
+    # 注意这个是device_id不是cabin_id（最屎山的一集）
+    # currentPositionMarker是可以表示当前目标位置的（细分的具体目标地点，而不是back封装之后一直是chargepoint不变）
+    # 相反，get_cabin_position在back封装后只会显示chargepoint
+    res = await get_device_status(device_bot1_chassis)
+    return res["data"]["deviceStatus"]["currentPositionMarker"]
 
 async def run(locations, cabin_id):
     """执行任务流
@@ -220,7 +229,6 @@ async def run(locations, cabin_id):
 
         logger.info('开始执行任务流，设备ID: %s, 位置列表: %s', cabin_id, locations)
         # 执行每个位置的任务
-        task_results = []
         for idx, location in enumerate(locations):
             logger.info('执行第 %d 个任务，目标位置: %s', idx + 1, location)
             try:
@@ -232,16 +240,26 @@ async def run(locations, cabin_id):
                 res = await (make_task_flow_dock_cabin_and_move_target_with_wait_action
                              (cabin_id, chassis_id, location, 100))
                 flag = False  # 标记是否完成一次开门关门 关门为 False 开门为 True
-                task_results.append(res)
                 logger.info('位置 %s 任务执行结果: %s', location, res)
-                for i in range(100): # overtime 100s, 确保任务流执行成功
+                
+                while True:
+                    # 任务启动大概0.3~0.5s，但是api延迟是毫秒级的，所以需要等待1s
+                    await asyncio.sleep(1) # 相当于do while
+
                     res = await check(cabin_id)
+                    position = await check_position(cabin_id)
+
                     logger.debug('flag: %s, res: %s', flag, res)
+                    logger.debug('position: %s', position)
+
                     if res == "open":
                         flag = True
-                    if res == "close" and flag is True:
+                    elif res == "close" and flag is True:
                         break
-                    await asyncio.sleep(1)
+                    elif flag is False and (pos=="charge_point_1F_40300716" 
+                                 or pos=="charge_point_3F_40300696"):
+                        return {'code': 1, 'message': '仓门未打开，返回默认充电桩'}
+                
                 logger.info('code: 0, message: 任务%s执行成功 设备ID: %s, 位置: %s',
                             idx + 1, cabin_id, location)
             except Exception as e:
@@ -252,5 +270,7 @@ async def run(locations, cabin_id):
         logger.error('任务流执行失败: %s', str(e))
         return {'code': 1, 'message': f'任务流执行失败: {str(e)}'}
 
+    # back回返回默认充电桩，在执行完最后一个任务后再执行一个回到原地的任务
+    # 触发back后会自动回到默认充电桩，省去的调env的复杂结构
     await (make_task_flow_dock_cabin_and_move_target_with_wait_action
-           (cabin_id, chassis_id, "charge_point_1F_40300716", 100))
+           (cabin_id, chassis_id, locations[-1], 10))
