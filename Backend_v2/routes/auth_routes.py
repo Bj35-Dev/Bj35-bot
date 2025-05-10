@@ -98,7 +98,7 @@ def register_routes(app):
             pinyin_list = pinyin(name, style=Style.NORMAL)
             # 提取每个汉字拼音的首字母
             initials = ''.join([word[0][0].upper() for word in pinyin_list])
-            # 生成默认密码（教室姓名首字母大写+教师号）
+            # 生成默认密码（教师姓名首字母大写+教师号）
             password = initials + str(user_info.get('userid'))
             # 添加用户到数据库
             await UserService.add_user({
