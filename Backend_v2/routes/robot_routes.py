@@ -5,7 +5,7 @@ This file contains the routes for the robot devices.
 from quart import jsonify
 from quart_jwt_extended import jwt_required
 
-from services import yunji_api
+from services.yunji_service import YunjiService
 from utils import error_handler
 
 from settings import settings
@@ -21,7 +21,8 @@ def register_routes(app):
     async def fetch_robot_list():
         """获取格式化的机器人列表及其状态"""
         # 获取所有设备
-        device_list_response = await yunji_api.get_device_list()
+        service = YunjiService()
+        device_list_response = await service.get_device_list()
 
         if device_list_response.get('code') != 0:
             return jsonify({
@@ -45,7 +46,8 @@ def register_routes(app):
     @error_handler
     async def fetch_device_status(device_id):
         """获取单个设备的状态"""
-        device_status = await yunji_api.get_device_status(device_id)
+        service = YunjiService()
+        device_status = await service.get_device_status(device_id)
         return jsonify(device_status)
 
     @app.route(URI_PREFIX + '/device_task/<device_id>', methods=['GET'])
@@ -53,7 +55,8 @@ def register_routes(app):
     @error_handler
     async def fetch_device_task(device_id):
         """获取单个设备的任务"""
-        device_task = await yunji_api.get_device_task(device_id)
+        service = YunjiService()
+        device_task = await service.get_device_task(device_id)
         return jsonify(device_task)
 
     @app.route(URI_PREFIX + '/cabin-position/<device_id>', methods=['GET'])
@@ -61,7 +64,8 @@ def register_routes(app):
     @error_handler
     async def fetch_cabin_position(device_id):
         """获取机柜位置"""
-        cabin_position = await yunji_api.get_cabin_position(device_id)
+        service = YunjiService()
+        cabin_position = await service.get_cabin_position(device_id)
         return jsonify(cabin_position)
 
     @app.route(URI_PREFIX +
@@ -70,7 +74,8 @@ def register_routes(app):
     @error_handler
     async def reset_cabin_position(device_id, position):
         """重置机柜位置"""
-        result = await yunji_api.reset_cabin_position(device_id, position)
+        service = YunjiService()
+        result = await service.reset_cabin_position(device_id, position)
         return jsonify(result)
 
 # 机器人位置名称映射
@@ -110,7 +115,8 @@ async def process_robot_devices(device_list):
             continue
 
         # 获取机器人状态
-        device_status_response = await yunji_api.get_device_status(robot_id)
+        service = YunjiService()
+        device_status_response = await service.get_device_status(robot_id)
 
         # 查找匹配的机柜ID
         cabin_id = None

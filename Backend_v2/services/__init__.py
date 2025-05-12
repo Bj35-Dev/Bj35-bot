@@ -17,4 +17,5 @@ __all__ = [
     'TokenManager',
     'WeComService',
     'UserService',
+    'YunjiService'
 ]
