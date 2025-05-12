@@ -9,7 +9,7 @@ from quart_jwt_extended import jwt_required
 from services import yunji_api
 from utils import error_handler
 
-from settings import settings
+from utils.settings import settings
 
 URI_PREFIX = settings.URI_PREFIX
 

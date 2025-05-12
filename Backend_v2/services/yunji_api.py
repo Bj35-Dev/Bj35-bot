@@ -9,7 +9,7 @@ import logging
 import asyncio
 import aiohttp
 
-from settings import settings
+from utils.settings import settings
 
 logger = logging.getLogger(__name__)
 

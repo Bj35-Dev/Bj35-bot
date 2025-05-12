@@ -9,7 +9,7 @@ from utils import error_handler
 
 from services import UserService, WeComService
 
-from settings import settings
+from utils.settings import settings
 
 
 URI_PREFIX = settings.URI_PREFIX

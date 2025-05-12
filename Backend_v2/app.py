@@ -18,7 +18,7 @@ from quart import Quart
 from quart_cors import cors
 from quart_jwt_extended import JWTManager
 
-from settings import settings
+from utils.settings import settings
 from utils import PostgreSQLConnector, RedisConnector
 from utils.exceptions import DatabaseConnectionError, RedisConnectionError
 from utils import configure_jwt_handlers

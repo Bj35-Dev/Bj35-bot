@@ -15,7 +15,7 @@ from typing import Optional
 import redis.asyncio as redis
 from redis.exceptions import RedisError
 
-from settings import settings
+from utils.settings import settings
 from utils.exceptions import RedisConnectionError
 
 logger = logging.getLogger(__name__)
