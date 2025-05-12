@@ -40,7 +40,13 @@ def register_routes(app):
             return jsonify(code=1, message="Missing username or password"), 422
 
         try:
-            user_info = await UserService.verify_user_credentials(username, password)
+            user = await UserService.verify_user_credentials(username, password)
+
+            if not user:
+                logger.warning("User %s login failed: Invalid credentials", username)
+                return jsonify(code=1, message="Invalid username or password")
+
+            user_info = await UserService.get_userinfo_by_username(user[0], user[1])
 
             if not user_info:
                 logger.warning("User %s not found in database", username)
