@@ -17,7 +17,7 @@ from datetime import datetime
 
 import aiohttp
 
-from settings import settings
+from utils.settings import settings
 from utils import RedisConnector
 from utils.exceptions import GetWeComTokenError
 

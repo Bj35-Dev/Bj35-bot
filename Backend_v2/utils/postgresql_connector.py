@@ -16,7 +16,7 @@ from typing import Dict, Optional, Any
 
 import asyncpg
 
-from settings import settings
+from utils.settings import settings
 
 from utils.exceptions import DatabaseConnectionError
 

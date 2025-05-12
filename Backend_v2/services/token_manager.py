@@ -24,7 +24,7 @@ import aiohttp
 from filelock import FileLock
 from cryptography.fernet import Fernet
 
-from settings import settings
+from utils.settings import settings
 from utils.exceptions import UpdateTokenError, TokenNotFoundError
 
 logger = logging.getLogger(__name__)
