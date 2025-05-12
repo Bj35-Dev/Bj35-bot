@@ -11,6 +11,8 @@ import logging
 from quart import jsonify, request, redirect
 from quart_jwt_extended import create_access_token
 
+from argon2.exceptions import VerifyMismatchError
+
 from services import UserService, WeComService
 
 from pypinyin import pinyin, Style
@@ -37,13 +39,17 @@ def register_routes(app):
         if not username or not password:
             return jsonify(code=1, message="Missing username or password"), 422
 
-        user = await UserService.verify_user_credentials(username, password)
+        try:
+            user = await UserService.verify_user_credentials(username, password)
 
-        if user:
+            if not user:
+                logger.warning("User %s login failed: Invalid credentials", username)
+                return jsonify(code=1, message="Invalid username or password")
+
             user_info = await UserService.get_userinfo_by_username(user[0], user[1])
 
             if not user_info:
-                logger.warning(f"User {username} not found in database")
+                logger.warning("User %s not found in database", username)
                 return jsonify(code=1, message="User not found")
 
             # 创建访问令牌，可选择添加更多声明
@@ -57,11 +63,12 @@ def register_routes(app):
                     'wecom_id': user_info['wecom_id'],
                 }
             )
-            logger.info(f"User {username} logged in successfully")
+            logger.info("User %s logged in successfully", username)
             return jsonify(code=0, access_token=access_token)
-        logger.warning(f"User {username} login failed")
-        return jsonify(code=1, message="Invalid username or password")
 
+        except VerifyMismatchError as e:
+            logger.error("User verification failed: %s", str(e))
+            return jsonify(code=1, message="User verification failed"), 401
 
     # 企业微信OAuth路由
     @app.route(URI_PREFIX + '/auth/wecom', methods=['GET'])
