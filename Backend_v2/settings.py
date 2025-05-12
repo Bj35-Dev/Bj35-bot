@@ -173,9 +173,9 @@ class Settings(BaseSettings):
         {"value": "S407", "label": "S407"},
         {"value": "S408", "label": "S408"},
         {"value": "S409", "label": "S409"},
-        {"value": "一楼作业柜", "label": "一楼作业柜"},
-        {"value": "二楼作业柜", "label": "二楼作业柜"},
-        {"value": "三楼作业柜", "label": "三楼作业柜"}
+        {"value": "一层作业柜", "label": "一层作业柜"},
+        {"value": "二层作业柜", "label": "二层作业柜"},
+        {"value": "三层作业柜", "label": "三层作业柜"}
     ]
 
 settings = Settings()
