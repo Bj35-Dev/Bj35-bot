@@ -179,12 +179,6 @@ async def get_device_by_id(cabin_id):
     return {"id": cabin_id, "type": "robot"}
 
 
-# 充电桩位置常量
-CHARGE_POINTS = {
-    "1F": "charge_point_1F_40300716",
-    "3F": "charge_point_3F_40300696"
-}
-
 async def check_lockers_status(cabin_id):
     """检查设备状态，判断是否开门或关门"""
     res = await get_device_status(cabin_id)
@@ -225,7 +219,7 @@ async def _check_door_status(cabin_id: str, flag: bool) -> tuple[bool, str | Non
 
 def _is_at_charge_point(position: str) -> bool:
     """判断是否处于充电桩位置"""
-    return position in CHARGE_POINTS.values()
+    return "charge_point" in position.lower()
 
 
 async def run(locations, cabin_id):
@@ -277,21 +271,24 @@ async def run(locations, cabin_id):
                 while True:
                     await asyncio.sleep(1)
                     
-                    position = await get_current_position_marker(chassis_id)
-                    flag, error = await _check_door_status(cabin_id, flag)
+                    # 获取设备实时状态
+                    status = await check_lockers_status(cabin_id)
+                    current_pos = await get_current_position_marker(chassis_id)
+                    logger.debug('门状态: %s，当前位置: %s', status, current_pos)
+
+                    # 状态处理逻辑
+                    if status == "open":
+                        flag = True
+                    elif status == "close" and flag:
+                        logger.info('完成完整的开门-关门流程')
+                        break  # 退出等待循环继续下一个任务
                     
-                    if error:
-                        return {'code': 1, 'message': error}
+                    # 异常检测：未开门但返回充电点
+                    if not flag and _is_at_charge_point(current_pos):
+                        logger.warning('未检测到开门直接返回充电点')
+                        return {'code': 2, 'message': '异常返回充电点，门未开启'}
                         
-                    logger.debug('门状态标志: %s, 当前位置: %s', flag, position)
-                    
-                    if not flag and _is_at_charge_point(position):
-                        logger.warning('检测到未开门状态下处于充电桩位置: %s', position)
-                        return {'code': 1, 'message': '仓门未打开，返回默认充电桩'}
-                        
-                    if flag and await check_lockers(cabin_id) == "close":
-                        logger.info('检测到完成一次开门-关门循环')
-                        break
+                    logger.debug('门状态标志: %s, 当前位置: %s', flag, current_pos)
                 
                 logger.info('code: 0, message: 任务%s执行成功 设备ID: %s, 位置: %s',
                             idx + 1, cabin_id, location)
