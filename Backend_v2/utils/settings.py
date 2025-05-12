@@ -16,6 +16,25 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Pydantic 类型检查和验证"""
 
+    def __new__(cls, *args, **kwargs) -> 'Settings':
+        """确保只创建一个 Settings 实例"""
+        if not hasattr(cls, "_instance"):
+            cls._instance = super(Settings, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self, *args, **kwargs) -> None:
+        """只初始化一次"""
+        if hasattr(self, "_initialized"):
+            return
+
+        self._initialized = True
+        super().__init__(*args, **kwargs)
+
+    class Config:           # pylint: disable=too-few-public-methods
+        """Pydantic 配置"""
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
     ENV: str = Field(default="production")
 
     URI_PREFIX: str = Field(default='/api/v1')
@@ -58,11 +77,6 @@ class Settings(BaseSettings):
     # 机器人相关配置
     CABINS: Dict[str, str] = Field(default={})
     CHASSIS: Dict[str, str] = Field(default={})
-
-    class Config:           # pylint: disable=too-few-public-methods
-        """Pydantic 配置"""
-        env_file = ".env"
-        env_file_encoding = "utf-8"
 
     YUNJI_ACCESS_TOKEN: str = Field(default="access_token")
     YUNJI_ACCESS_TOKEN_EXPIRES: str = Field(default="2024-12-31T23:59:59+08:00")
