@@ -6,7 +6,7 @@ task_routes.py
 from quart import jsonify, request
 from quart_jwt_extended import jwt_required
 
-from services import yunji_api
+from services import YunjiService
 from utils import error_handler
 
 from utils.settings import settings
@@ -22,7 +22,7 @@ def register_routes(app):
     @error_handler
     async def fetch_school_tasks(pagesize, currentpage):
         """获取学校任务"""
-        school_tasks = await yunji_api.get_school_tasks(pagesize, currentpage)
+        school_tasks = await YunjiService.get_school_tasks(pagesize, currentpage)
         no = 1
         for task in school_tasks.get('data', []):
             task['no'] = no
@@ -34,7 +34,7 @@ def register_routes(app):
     @error_handler
     async def fetch_running_task():
         """获取正在运行的任务"""
-        running_task = await yunji_api.get_running_task()
+        running_task = await YunjiService.get_running_task()
         return jsonify(running_task)
 
     @app.route(URI_PREFIX +
@@ -43,8 +43,7 @@ def register_routes(app):
     @error_handler
     async def task_move_and_lift(device_id, docking_marker, target):
         """创建移动和升降任务"""
-        result = await (yunji_api.make_task_flow_move_and_lift_down
-                        (device_id, docking_marker, target))
+        result = await YunjiService.make_task_flow_move_and_lift_down(device_id, docking_marker, target)
         return jsonify(result)
 
     @app.route(URI_PREFIX +
@@ -53,7 +52,7 @@ def register_routes(app):
     @error_handler
     async def task_dock_and_move(device_id, target):
         """创建对接机柜和移动任务"""
-        result = await yunji_api.make_task_flow_docking_cabin_and_move_target(device_id, target)
+        result = await YunjiService.make_task_flow_docking_cabin_and_move_target(device_id, target)
         return jsonify(result)
 
     @app.route(URI_PREFIX +
@@ -62,8 +61,7 @@ def register_routes(app):
     @error_handler
     async def task_dock_and_back(device_id, target):
         """创建back任务"""
-        result = await (yunji_api.make_task_flow_dock_cabin_and_move_target_with_wait_action
-                        (device_id, target, False))
+        result = await YunjiService.make_task_flow_dock_cabin_and_move_target_with_wait_action(device_id, target, False)
         return jsonify(result)
 
     @app.route(URI_PREFIX + '/run-task/<device_id>', methods=['POST'])
@@ -75,7 +73,7 @@ def register_routes(app):
         locations = data.get('locations', [])
 
         # 调用RUN函数
-        run_result = await yunji_api.run(locations, device_id)
+        run_result = await YunjiService.run(locations, device_id)
 
         # 根据执行结果返回响应
         return jsonify(run_result)
