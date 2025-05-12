@@ -38,22 +38,6 @@ async def get_current_position_marker(chassis_id):
     res = await get_device_status(chassis_id)
     return res["data"]["deviceStatus"]["currentPositionMarker"]
 
-async def _check_door_status(cabin_id: str, flag: bool) -> tuple[bool, str | None]:
-    """检查门状态并更新标志位
-    Args:
-        cabin_id: 设备ID
-        flag: 当前开门状态标志位
-        
-    Returns:
-        tuple[是否更新标志位, 错误信息]
-    """
-    status = await check_lockers_status(cabin_id)
-    if status == "open":
-        return True, None
-    elif status == "close" and flag:
-        return False, None
-    return flag, None  # 保持原状态
-
 
 def _is_at_charge_point(position: str) -> bool:
     """判断是否处于充电桩位置"""
