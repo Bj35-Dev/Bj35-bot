@@ -146,6 +146,7 @@ async def before_serving():
 async def after_serving():
     """在应用关闭后执行的函数"""
     await PostgreSQLConnector.close()
+    await RedisConnector.close()
     logging.info("应用已关闭 owo ~")
 
 if __name__ == '__main__':
