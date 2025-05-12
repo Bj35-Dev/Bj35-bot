@@ -67,7 +67,7 @@ def register_routes(app):
 
         except VerifyMismatchError as e:
             logger.error("User verification failed: %s", str(e))
-            return jsonify(code=1, message="User verification failed"), 401
+            return jsonify(code=1, message="User verification failed")
 
     # 企业微信OAuth路由
     @app.route(URI_PREFIX + '/auth/wecom', methods=['GET'])
