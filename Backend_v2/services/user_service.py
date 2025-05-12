@@ -64,14 +64,7 @@ class UserService:
         """验证用户凭据"""
         try:
             row = await PostgreSQLConnector.fetch_one("""
-                SELECT
-                    CASE
-                        WHEN wecom = $1 THEN 'wecom'
-                        WHEN name = $1 THEN 'name'
-                        WHEN email = $1 THEN 'email'
-                        WHEN mobile = $1 THEN 'mobile'
-                    END as kind,
-                    password
+                SELECT *
                 FROM userinfo
                 WHERE wecom = $1 OR name = $1 OR email = $1 OR mobile = $1
                 LIMIT 1
