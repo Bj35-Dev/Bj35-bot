@@ -17,7 +17,7 @@ from services import UserService, WeComService
 
 from pypinyin import pinyin, Style
 
-from settings import settings
+from utils.settings import settings
 
 logger = logging.getLogger(__name__)
 
