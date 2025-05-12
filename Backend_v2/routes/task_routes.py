@@ -6,7 +6,7 @@ task_routes.py
 from quart import jsonify, request
 from quart_jwt_extended import jwt_required
 
-from services import yunji_api
+from services import yunji_api, task_service
 from utils import error_handler
 
 from settings import settings
@@ -75,7 +75,7 @@ def register_routes(app):
         locations = data.get('locations', [])
 
         # 调用RUN函数
-        run_result = await yunji_api.run(locations, device_id)
+        run_result = await task_service.run(locations, device_id)
 
         # 根据执行结果返回响应
         return jsonify(run_result)
