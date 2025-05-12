@@ -6,7 +6,7 @@ task_routes.py
 from quart import jsonify, request
 from quart_jwt_extended import jwt_required
 
-from services.yunji_service import YunjiService
+from services import YunjiService
 from utils import error_handler
 
 from settings import settings
