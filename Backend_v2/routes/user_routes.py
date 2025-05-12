@@ -7,8 +7,6 @@ import logging
 from quart import jsonify, request
 from quart_jwt_extended import jwt_required
 
-from utils import error_handler
-
 from services import UserService
 
 from settings import settings
@@ -22,7 +20,6 @@ def register_routes(app):
 
     @app.route(URI_PREFIX + '/get_user_profile', methods=['GET'])
     @jwt_required
-    # @error_handler
     async def get_user_profile():
         username = request.args.get('username', '')
         logger.debug("username: %s", username)
@@ -32,7 +29,6 @@ def register_routes(app):
 
     @app.route(URI_PREFIX + '/post_user_profile', methods=['POST'])
     @jwt_required
-    @error_handler
     async def post_user_profile():
         data = await request.json
         # # 验证邮箱地址，如果需要
@@ -54,7 +50,6 @@ def register_routes(app):
             {'success': False, 'message': update_response['message']}), 400
 
     @app.route(URI_PREFIX + '/post_user_avatar', methods=['POST'])
-    @error_handler
     @jwt_required
     async def post_user_avatar():
         data = await request.json

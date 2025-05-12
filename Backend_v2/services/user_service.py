@@ -60,7 +60,7 @@ class UserService:
             return {'success': False}
 
     @staticmethod
-    async def verify_user_credentials(username: str, password: str) -> Optional[tuple]:
+    async def verify_user_credentials(username: str, password: str) -> Optional[Dict[str, Any]]:
         """验证用户凭据"""
         try:
             row = await PostgreSQLConnector.fetch_one("""
@@ -79,8 +79,8 @@ class UserService:
             """, username)
 
             ph = PasswordHasher()
-            if row and row.get('kind') and ph.verify(row.get('password', ''), password):
-                return (username, row['kind'])
+            if row and ph.verify(row.get('password', ''), password):
+                return row
             return None
         except Exception as e:
             logger.error("验证用户凭据失败: %s", str(e))
