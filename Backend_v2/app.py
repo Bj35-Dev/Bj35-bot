@@ -19,7 +19,7 @@ from quart_cors import cors
 from quart_jwt_extended import JWTManager
 
 from utils.settings import settings
-from utils.db import PostgreSQLConnector, RedisConnector, DatabaseInitializer
+from utils.db import PostgreSQLConnector, RedisConnector, DatabaseInitializer, DatabaseMigrator
 from utils.exceptions import DatabaseConnectionError, RedisConnectionError
 from utils import configure_jwt_handlers
 from services import TokenManager
@@ -93,6 +93,7 @@ async def init_db():
         await RedisConnector.initialize()
 
         await DatabaseInitializer.initialize_database()
+        await DatabaseMigrator.apply_migrations()
 
         logging.info("数据库连接初始化成功")
     except DatabaseConnectionError as e:

@@ -8,10 +8,12 @@ Bj35 Bot v2
 from .postgresql_connector import PostgreSQLConnector
 from .redis_connector import RedisConnector
 from .initializer import DatabaseInitializer
+from .migrator import DatabaseMigrator
 
 # 导出所有类，使它们可以通过 utils.db 直接访问
 __all__ = [
     'PostgreSQLConnector',
     'RedisConnector',
-    'DatabaseInitializer'
+    'DatabaseInitializer',
+    'DatabaseMigrator',
 ]
