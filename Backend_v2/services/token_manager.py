@@ -8,6 +8,7 @@ Copyright (C) 2025 AptS:1547
 
 本文件定义了令牌管理服务，包括令牌的存储、加密、检查和更新等功能。
 """
+
 import logging
 import json
 import uuid
