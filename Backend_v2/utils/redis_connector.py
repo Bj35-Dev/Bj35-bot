@@ -10,13 +10,10 @@ Copyright (C) 2025 AptS:1547
 """
 
 import logging
-import socket
 from typing import Optional
-from urllib.parse import urlparse
 
-import redis.asyncio as redis
+import redis.asyncio as aioredis 
 from redis.exceptions import RedisError
-from redis.asyncio.connection import ConnectionPool
 
 from utils.settings import settings
 from utils.exceptions import RedisConnectionError
@@ -27,78 +24,60 @@ logger = logging.getLogger(__name__)
 class RedisConnector:
     """Redis连接器类，提供异步Redis操作"""
 
-    __pool: Optional[ConnectionPool] = None
-    __client: Optional[redis.Redis] = None
-    __initialized: bool = False
+    __pool: Optional[aioredis.ConnectionPool] = None
 
     @classmethod
     async def initialize(cls) -> None:
         """初始化Redis连接池"""
-        if cls.__initialized:
-            return
-
         try:
-            # 先解析主机名
-            parsed_url = urlparse(settings.REDIS_URL)
-            socket.gethostbyname(parsed_url.hostname)
-
-            # 创建连接池
-            cls.__pool = redis.ConnectionPool.from_url(
-                url=settings.REDIS_URL,
-                password=settings.REDIS_PASSWORD,
-                max_connections=settings.REDIS_POOL_MAX_SIZE,
-                encoding="utf-8",
-                decode_responses=True
-            )
-
-            # 创建测试连接并验证
-            test_client = redis.Redis(connection_pool=cls.__pool)
-            await test_client.ping()
-            await test_client.close()
-
-            cls.__initialized = True
-
-        except socket.gaierror as e:
-            logger.error("Redis主机名解析失败: %s", str(e))
-            raise RedisConnectionError(f"Redis主机名无法解析: {str(e)}") from e
+            pool = await cls._get_pool()
+            # 验证连接
+            client = aioredis.Redis(connection_pool=pool)
+            await client.ping()
+            logger.info("Redis连接池已初始化")
         except RedisError as e:
-            logger.error("Redis连接失败: %s", str(e))
             cls.__pool = None
-            raise RedisConnectionError(f"Redis连接测试失败: {str(e)}") from e
-        except Exception as e:
-            logger.error("Redis初始化时发生未知错误: %s", str(e))
-            cls.__pool = None
-            raise RedisConnectionError(f"Redis初始化失败: {str(e)}") from e
+            raise RedisConnectionError(f"无法连接到Redis: {str(e)}") from e
 
     @classmethod
-    async def _get_client(cls) -> redis.Redis:
-        """获取Redis客户端实例"""
-        if not cls.__initialized:
-            await cls.initialize()
+    async def _get_pool(cls) -> aioredis.ConnectionPool:
+        """获取或创建Redis连接池"""
+        if cls.__pool is None:
+            try:
+                cls.__pool = aioredis.ConnectionPool.from_url(
+                    url=settings.REDIS_URL,
+                    password=settings.REDIS_PASSWORD,
+                    max_connections=settings.REDIS_POOL_MAX_SIZE,
+                    encoding="utf-8",
+                )
 
-        if cls.__client is None and cls.__pool is not None:
-            cls.__client = redis.Redis(connection_pool=cls.__pool)
-        return cls.__client
+                logger.debug("Redis初始化连接池成功: %s", cls.__pool)
+            except RedisError as e:
+                raise RedisConnectionError(f"无法连接到Redis: {str(e)}") from e
+
+        return cls.__pool
+
+    @classmethod
+    async def _get_client(cls) -> aioredis.Redis:
+        """获取Redis客户端实例"""
+        pool = await cls._get_pool()
+        return aioredis.Redis(connection_pool=pool)
 
     @classmethod
     async def close(cls) -> None:
-        """关闭Redis连接"""
-        if cls.__client:
-            await cls.__client.close()
-            cls.__client = None
-
-        if cls.__pool:
-            await cls.__pool.disconnect()
+        """关闭Redis连接池"""
+        if cls.__pool is not None:
+            await cls.__pool.aclose()
             cls.__pool = None
+            logger.info("Redis连接池已关闭")
 
-        cls.__initialized = False
-
+    # 基础操作方法
     @classmethod
     async def get(cls, key: str) -> Optional[str]:
         """获取键值"""
         try:
-            client = await cls._get_client()
-            return await client.get(key)
+            conn = await cls._get_client()
+            return await conn.get(key)
         except RedisError as e:
             logger.error("Redis GET操作失败 [%s]: %s", key, str(e))
             return None
