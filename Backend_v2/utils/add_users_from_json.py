@@ -50,6 +50,7 @@ import asyncio
 import logging
 from typing import Dict, Any
 from argon2 import PasswordHasher
+from pypinyin import pinyin, Style
 import asyncpg
 
 # 配置日志
@@ -68,6 +69,22 @@ DB_CONFIG = {
     'database': 'bj35bot',
 }
 
+
+def process_name(name: str) -> str:
+    """处理名字，中文转换为拼音首字母，英文去除空格"""
+    # 去除空格
+    name = name.replace(' ', '')
+
+    # 检查是否包含中文字符
+    if any('\u4e00' <= char <= '\u9fff' for char in name):
+        # 获取拼音首字母
+        py = pinyin(name, style=Style.FIRST_LETTER)
+        # 将首字母大写，其余小写，并连接
+        result = ''.join(letter[0].upper() if i == 0 else letter[0].lower()
+                         for i, letter in enumerate(py))
+        return result
+    # 如果是英文，直接返回去除空格后的字符串
+    return name
 
 class PostgreSQLConnector:
     """PostgreSQL连接器"""
@@ -101,16 +118,18 @@ async def add_user(data: Dict[str, Any]) -> Dict[str, bool]:
             password = ph.hash(password)
 
         department = data.get('department', 'None')
-        position = data.get('position', 'B312')
-        mobile = "None"
+        position = data.get('position', 'Bj35')
+        mobile = data.get('telephone', 'None')
         email = data.get('email', f"{wecom_id}@bj35.com")
         language = data.get('language', 'zh')
         avatar_text = data.get('avatar', 'None')
 
-        await PostgreSQLConnector.execute('''
-            INSERT INTO userinfo (wecom, wecom_id, name, password, department, position, mobile, language, email, avatar_text)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        ''', wecom, wecom_id, name, password, department, position, mobile, language, email, avatar_text)
+        print(f"添加用户: {wecom}, {wecom_id}, {name}, {password}, {department}, {position}, {mobile}, {language}, {email}, {avatar_text}")
+
+        # await PostgreSQLConnector.execute('''
+        #     INSERT INTO userinfo (wecom, wecom_id, name, password, department, position, mobile, language, email, avatar_text)
+        #     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        # ''', wecom, wecom_id, name, password, department, position, mobile, language, email, avatar_text)
 
         logger.info("用户信息已添加: %s", name)
         return {'success': True}
@@ -127,13 +146,8 @@ async def process_users_from_json(json_data: List[Dict]) -> List[Dict[str, bool]
             continue
 
         # 提取英文名（优先使用extattr中的英文名）
-        english_name = ''
-        for attr in user.get('extattr', {}).get('attrs', []):
-            if attr['name'] == '英文名':
-                english_name = attr['text'].get('value', '')
-                break
-        if not english_name:
-            english_name = user.get('english_name', '')
+        wecom = next((attr.get('text', {}).get('value') for attr in data.get('extattr', {}).get('attrs', []) if
+              attr.get('name') == '英文名' and attr.get('text', {}).get('value')), data.get('english_name') or 'None')
 
         # 构建用户数据
         user_data = {
@@ -141,7 +155,8 @@ async def process_users_from_json(json_data: List[Dict]) -> List[Dict[str, bool]
             'wecom_id': user.get('userid', '0'),
             'name': user.get('name', 'None'),
             'department': str(user.get('department', [0])[0]),
-            'position': user.get('position', 'B312'),
+            'position': user.get('position', 'Bj35'),
+            'telephone': user.get('telephone', 'None'),
             'email': f"{user.get('userid')}@bj35.com",
             'language': 'zh',
             'avatar': ''

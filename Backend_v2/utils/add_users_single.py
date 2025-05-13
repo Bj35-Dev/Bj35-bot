@@ -61,7 +61,7 @@ async def add_user(data: Dict[str, Any]) -> Dict[str, bool]:
 
         department = data.get('department', 'None')
         position = data.get('position', 'B312')
-        mobile = "None"
+        mobile = data.get('telephone', 'None')
         email = data.get('email', f"{wecom_id}@bj35.com")
         language = data.get('language', 'zh')
         avatar_text = data.get('avatar', 'None')
@@ -86,6 +86,7 @@ async def main():
         'wecom_id': "5712",
         'name': 'cg8',
         'password': 'dzc20070818',
+        'telephone': '13800138000',
         'department': '测试部门',
         'position': 'C206',
         'email': 'cg8@bj35.com',
