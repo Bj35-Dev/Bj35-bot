@@ -250,7 +250,7 @@ class TokenManager:
             expiration_ts = int(token_data["expire_time"])
             current_ts = datetime.now().timestamp()
             days_remaining = (expiration_ts - current_ts) / (60 * 60 * 24)
-            logger.info("Access token将在 %.2f天后过期", days_remaining)
+            logger.info("Access token将在 %.2f 天后过期", days_remaining)
         except (IOError, yaml.YAMLError) as e:
             logger.error("获取token过期时间失败：%s", str(e))
 

@@ -95,17 +95,16 @@ async def init_db():
         await DatabaseInitializer.initialize_database()
 
         logging.info("数据库连接初始化成功")
-        return True
     except DatabaseConnectionError as e:
+        logging.error("数据库初始化失败: %s", e)
         if settings.ENV == 'development':
-            logging.error("数据库初始化失败: %s", e)
-            return True
-        return False
+            return
+        raise
     except RedisConnectionError as e:
+        logging.error("Redis初始化失败: %s", e)
         if settings.ENV == 'development':
-            logging.error("Redis初始化失败: %s", e)
-            return True
-        return False
+            return
+        raise
 
 
 @app.before_serving
@@ -133,8 +132,9 @@ async def before_serving():
     """
     logging.info("\n%s", ascii_art)
 
-    if await init_db():
-        logging.info("数据库连接成功")
+    logging.info("正在初始化数据库连接...")
+    await init_db()
+
     if await TokenManager.get_valid_token():
         TokenManager.log_token_expiry()
         logging.info("获取有效的token成功")

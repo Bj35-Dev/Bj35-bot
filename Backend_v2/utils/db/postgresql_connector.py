@@ -38,7 +38,8 @@ class PostgreSQLConnector:
                     await conn.execute('SELECT 1')
                 logger.info("数据库连接池已存在且连接正常")
                 return
-            except:
+            except asyncpg.PostgresError as e:
+                logger.warning("现有连接池出错，将重新创建: %s", str(e))
                 cls.pool = None
 
         max_retries = 3
@@ -66,7 +67,7 @@ class PostgreSQLConnector:
                     logger.info("数据库连接成功")
 
                 return
-            except asyncpg.PostgresError as e:
+            except (asyncpg.PostgresError, OSError) as e:
                 retry_count += 1
                 if retry_count >= max_retries:
                     logger.error("PostgreSQL 连接失败，已重试 %d 次，退出", max_retries)
