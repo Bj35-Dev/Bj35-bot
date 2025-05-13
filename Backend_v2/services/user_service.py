@@ -14,7 +14,7 @@ import logging
 from typing import Dict, Optional, Any
 from argon2 import PasswordHasher
 
-from utils.postgresql_connector import PostgreSQLConnector
+from utils.db.postgresql_connector import PostgreSQLConnector
 
 logger = logging.getLogger(__name__)
 

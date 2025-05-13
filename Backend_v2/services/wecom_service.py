@@ -18,7 +18,7 @@ from datetime import datetime
 import aiohttp
 
 from utils.settings import settings
-from utils import RedisConnector
+from utils.db import RedisConnector
 from utils.exceptions import GetWeComTokenError
 
 logger = logging.getLogger(__name__)

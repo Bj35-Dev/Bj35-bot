@@ -13,11 +13,11 @@ import logging
 import asyncio
 from asyncio import Lock
 from typing import Dict, Optional, Any
+from contextlib import asynccontextmanager
 
 import asyncpg
 
 from utils.settings import settings
-
 from utils.exceptions import DatabaseConnectionError
 
 logger = logging.getLogger(__name__)
@@ -60,23 +60,10 @@ class PostgreSQLConnector:
                     max_inactive_connection_lifetime=300,
                 )
 
-                # 测试连接并检查表
+                # 测试连接
                 async with cls.pool.acquire() as conn:
-                    # 检查表是否存在
-                    tables = await conn.fetch("""
-                        SELECT table_name 
-                        FROM information_schema.tables 
-                        WHERE table_schema = 'public'
-                    """)
-                    existing_tables = [t['table_name'] for t in tables]
-
-                    if 'userinfo' not in existing_tables:
-                        logger.info("数据库连接成功，但未找到用户信息表")
-                        await cls.create_table()
-                    else:
-                        logger.info("数据库连接成功，用户信息表已存在")
-                        row_count = await conn.fetchval('SELECT COUNT(*) FROM userinfo')
-                        logger.debug(f"数据库连接成功，用户信息表存在，当前有 {row_count} 条记录")
+                    await conn.execute('SELECT 1')
+                    logger.info("数据库连接成功")
 
                 return
             except asyncpg.PostgresError as e:
@@ -89,34 +76,6 @@ class PostgreSQLConnector:
                 logger.warning("PostgreSQL 连接失败，正在重试 %d/%d 次，等待 %d 秒: %s",
                                retry_count, max_retries, wait_time, str(e))
                 await asyncio.sleep(wait_time)
-
-    @classmethod
-    async def create_table(cls) -> None:
-        """创建用户信息表（如果不存在）"""
-        if not cls.pool:
-            raise ValueError("数据库连接池尚未初始化")
-
-        try:
-            async with cls.pool.acquire() as conn:
-                await conn.execute('''
-                    CREATE TABLE IF NOT EXISTS userinfo (
-                        uid SERIAL PRIMARY KEY,
-                        wecom TEXT,
-                        wecom_id TEXT,
-                        name TEXT,
-                        password TEXT,
-                        department TEXT,
-                        position TEXT,
-                        mobile TEXT,
-                        language TEXT,
-                        email TEXT,
-                        avatar_text TEXT
-                    )
-                ''')
-                logger.info("用户信息表创建成功")
-        except Exception as e:
-            logger.error("创建表失败: %s", str(e))
-            raise
 
     @classmethod
     async def execute(cls, query: str, *args) -> None:
@@ -175,6 +134,33 @@ class PostgreSQLConnector:
             except Exception as e:
                 logger.error("SQL查询失败: %s", str(e))
                 raise
+
+    @classmethod
+    @asynccontextmanager
+    async def transaction(cls):
+        """
+        创建并返回一个数据库事务上下文管理器
+        
+        示例:
+            async with PostgreSQLConnector.transaction():
+                await PostgreSQLConnector.execute("INSERT INTO ...")
+                await PostgreSQLConnector.execute("UPDATE ...")
+        """
+        if not cls.pool:
+            raise ValueError("数据库连接池尚未初始化")
+
+        conn = await cls.pool.acquire()
+        tx = conn.transaction()
+        try:
+            await tx.start()
+            yield conn
+            await tx.commit()
+        except Exception as e:
+            await tx.rollback()
+            logger.error("事务执行失败，已回滚: %s", str(e))
+            raise
+        finally:
+            await cls.pool.release(conn)
 
     @classmethod
     async def close(cls) -> None:

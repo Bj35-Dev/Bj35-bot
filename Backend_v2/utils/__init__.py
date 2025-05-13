@@ -9,19 +9,18 @@ Copyright (C) 2025 AptS:1547
 本文件是 Bj35 Bot v2 的工具模块的初始化文件。
 """
 
-from .postgresql_connector import PostgreSQLConnector
-from .redis_connector import RedisConnector
-
 from .jwt_handlers import configure_jwt_handlers
 
 from .decorators import error_handler
 
 from . import exceptions
 
-__all__ = [
-    'PostgreSQLConnector', 'RedisConnector',
+from .settings import settings
 
+__all__ = [
     'configure_jwt_handlers', 'error_handler',
 
-    'exceptions'
+    'exceptions',
+
+    'settings'
 ]

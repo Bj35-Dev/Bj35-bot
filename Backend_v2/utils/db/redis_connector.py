@@ -12,7 +12,7 @@ Copyright (C) 2025 AptS:1547
 import logging
 from typing import Optional
 
-import redis.asyncio as aioredis 
+import redis.asyncio as aioredis
 from redis.exceptions import RedisError
 
 from utils.settings import settings
