@@ -27,6 +27,7 @@ class YunjiService:
         """创建请求头，包含签名随机数、时间戳、访问密钥ID和访问令牌"""
         signature_nonce = str(uuid.uuid4())
         headers = {
+            "User-Agent": "Bj35Bot/2.0",
             'signatureNonce': signature_nonce,
             'timestamp': datetime.now().strftime('%Y-%m-%dT%H:%M:%S+08:00'),
             'accessKeyId': settings.YUNJI_ACCESS_KEY_ID,

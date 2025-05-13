@@ -17,11 +17,11 @@ def error_handler(func):
         try:
             response = await func(*args, **kwargs)
             if isinstance(response, dict):
-                response_json = response
-                if response_json.get('code') == 11012:
-                    logger.warning("Authentication failed in %s : %s",func.__name__,response_json)
+                if response.get('code') == 11012:
+                    logger.warning("YUNJI Token expired, refreshing token")
                     await TokenManager.get_valid_token()
-                    return jsonify(response_json), response.get('status_code', 500)
+                    re_response = await func(*args, **kwargs)
+                    return jsonify(re_response), response.get('status_code', 500)
             return response
         except Exception as e:
             logger.error("Error in %s : %s", func.__name__, str(e))
