@@ -8,6 +8,7 @@ import asyncio
 import logging
 from typing import Dict, Any
 from argon2 import PasswordHasher
+from pypinyin import pinyin, Style
 import asyncpg
 
 # 配置日志
@@ -19,12 +20,23 @@ logger = logging.getLogger(__name__)
 
 # 数据库配置
 DB_CONFIG = {
-    'host': '192.168.1.9',
-    'port': 54321,
+    'host': 'your_postgresql_host',
+    'port': 5432,
     'user': 'postgres',
-    'password': 'NnK%AXCQKCYTGtzF',
+    'password': 'your_password',
     'database': 'bj35bot',
 }
+
+
+def process_name(name: str) -> str:
+    """处理名字，中文转换为拼音首字母，英文去除空格"""
+    name = name.replace(' ', '')
+    if any('\u4e00' <= char <= '\u9fff' for char in name):
+        py = pinyin(name, style=Style.FIRST_LETTER)
+        result = ''.join(letter[0].upper() if i == 0 else letter[0].lower()
+                         for i, letter in enumerate(py))
+        return result
+    return name
 
 
 class PostgreSQLConnector:
@@ -43,11 +55,16 @@ class PostgreSQLConnector:
         async with pool.acquire() as conn:
             return await conn.execute(query, *args)
 
+    @classmethod
+    async def fetch_val(cls, query: str, *args):
+        pool = await cls.get_pool()
+        async with pool.acquire() as conn:
+            return await conn.fetchval(query, *args)
 
 async def add_user(data: Dict[str, Any]) -> Dict[str, bool]:
     """添加用户信息"""
     try:
-        wecom = data.get('wecom', 'None')
+        wecom = process_name(data.get('name', 'None'))  # 处理名字
         wecom_id = data.get('wecom_id', 0)
         name = data.get('name', 'None')
         password = data.get('password', None)
@@ -66,12 +83,16 @@ async def add_user(data: Dict[str, Any]) -> Dict[str, bool]:
         language = data.get('language', 'zh')
         avatar_text = data.get('avatar', 'None')
 
-        await PostgreSQLConnector.execute('''
-            INSERT INTO userinfo (wecom, wecom_id, name, password, department, position, mobile, language, email, avatar_text)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        ''', wecom, wecom_id, name, password, department, position, mobile, language, email, avatar_text)
+        print(f"添加用户: {name} (wecom_id: {wecom_id})，部门: {department}，职位: {position}，手机: {mobile}，邮箱: {email}，语言: {language}，头像: {avatar_text}")
 
-        logger.info("用户信息已添加: %s", name)
+        await PostgreSQLConnector.execute('''
+                    INSERT INTO userinfo (wecom, wecom_id, name, password, department, 
+                                        position, mobile, language, email, avatar_text)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                    RETURNING uid
+                ''', wecom, wecom_id, name, password, department, position,
+                                          mobile, language, email, avatar_text)
+        logger.info("用户信息已添加: %s (uid: %s)", name, wecom_id)
         return {'success': True}
     except Exception as e:
         logger.error("添加用户失败: %s", str(e))
@@ -82,9 +103,8 @@ async def main():
     """主函数"""
     # 示例用户数据
     test_user = {
-        'wecom': 'dzc',
-        'wecom_id': "5712",
         'name': 'cg8',
+        'wecom_id': "5712",
         'password': 'dzc20070818',
         'telephone': '13800138000',
         'department': '测试部门',

@@ -64,7 +64,6 @@ def register_routes(app):
         {'success': False, 'message': update_response['message']}), 400
 
     @app.route(URI_PREFIX + '/change-password', methods=['POST'])
-    @error_handler
     @jwt_required
     async def update_user_password():
         data = await request.json

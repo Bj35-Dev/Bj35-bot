@@ -22,24 +22,30 @@ from utils.exceptions import DatabaseConnectionError
 
 logger = logging.getLogger(__name__)
 
+
 class PostgreSQLConnector:
     """PostgreSQL 数据库连接管理类，提供数据库操作的各种方法。"""
     pool: Optional[asyncpg.Pool] = None
-    lock: Lock = Lock()  # 创建一个全局锁
+    lock: Lock = Lock()
 
     @classmethod
     async def initialize(cls) -> None:
         """初始化数据库连接池"""
         if cls.pool:
-            logger.info("数据库连接池已存在，跳过初始化")
-            return
+            # 检查现有连接是否有效
+            try:
+                async with cls.pool.acquire() as conn:
+                    await conn.execute('SELECT 1')
+                logger.info("数据库连接池已存在且连接正常")
+                return
+            except:
+                cls.pool = None
 
         max_retries = 3
         retry_count = 0
 
         while retry_count < max_retries:
             try:
-                # 创建连接池
                 cls.pool = await asyncpg.create_pool(
                     user=settings.DB_USER,
                     password=settings.DB_PASSWORD,
@@ -49,19 +55,29 @@ class PostgreSQLConnector:
                     min_size=settings.DB_POOL_MIN_SIZE,
                     max_size=settings.DB_POOL_MAX_SIZE,
                     ssl=settings.DB_SSL,
-                    timeout=60,  # 设置连接超时时间
-                    command_timeout=60,  # 设置命令超时时间
-                    max_inactive_connection_lifetime=300,  # 设置最大非活动连接生命周期
+                    timeout=60,
+                    command_timeout=60,
+                    max_inactive_connection_lifetime=300,
                 )
 
-                # 测试连接
+                # 测试连接并检查表
                 async with cls.pool.acquire() as conn:
-                    await conn.execute('SELECT 1')
+                    # 检查表是否存在
+                    tables = await conn.fetch("""
+                        SELECT table_name 
+                        FROM information_schema.tables 
+                        WHERE table_schema = 'public'
+                    """)
+                    existing_tables = [t['table_name'] for t in tables]
 
-                # 创建必要的表
-                await cls.create_table()
+                    if 'userinfo' not in existing_tables:
+                        logger.info("数据库连接成功，但未找到用户信息表")
+                        await cls.create_table()
+                    else:
+                        logger.info("数据库连接成功，用户信息表已存在")
+                        row_count = await conn.fetchval('SELECT COUNT(*) FROM userinfo')
+                        logger.debug(f"数据库连接成功，用户信息表存在，当前有 {row_count} 条记录")
 
-                logger.info("PostgreSQL 连接已建立")
                 return
             except asyncpg.PostgresError as e:
                 retry_count += 1
@@ -69,20 +85,10 @@ class PostgreSQLConnector:
                     logger.error("PostgreSQL 连接失败，已重试 %d 次，退出", max_retries)
                     raise DatabaseConnectionError(f"无法连接到 PostgreSQL 数据库: {str(e)}") from e
 
-                wait_time = 2 ** retry_count  # 指数退避策略
+                wait_time = 2 ** retry_count
                 logger.warning("PostgreSQL 连接失败，正在重试 %d/%d 次，等待 %d 秒: %s",
-                                retry_count, max_retries, wait_time, str(e))
+                               retry_count, max_retries, wait_time, str(e))
                 await asyncio.sleep(wait_time)
-            except Exception as e:
-                logger.error("PostgreSQL 初始化失败: %s", str(e))
-                raise DatabaseConnectionError(f"无法连接到 PostgreSQL 数据库: {str(e)}") from e
-
-    @classmethod
-    async def close(cls) -> None:
-        """关闭数据库连接池，释放资源"""
-        if cls.pool:
-            await cls.pool.close()
-            logger.info("PostgreSQL 连接池已关闭")
 
     @classmethod
     async def create_table(cls) -> None:
@@ -94,7 +100,7 @@ class PostgreSQLConnector:
             async with cls.pool.acquire() as conn:
                 await conn.execute('''
                     CREATE TABLE IF NOT EXISTS userinfo (
-                        id SERIAL PRIMARY KEY,
+                        uid SERIAL PRIMARY KEY,
                         wecom TEXT,
                         wecom_id TEXT,
                         name TEXT,
@@ -107,7 +113,7 @@ class PostgreSQLConnector:
                         avatar_text TEXT
                     )
                 ''')
-                logger.debug("用户信息表创建成功或已存在")
+                logger.info("用户信息表创建成功")
         except Exception as e:
             logger.error("创建表失败: %s", str(e))
             raise
@@ -169,3 +175,10 @@ class PostgreSQLConnector:
             except Exception as e:
                 logger.error("SQL查询失败: %s", str(e))
                 raise
+
+    @classmethod
+    async def close(cls) -> None:
+        """关闭数据库连接池，释放资源"""
+        if cls.pool:
+            await cls.pool.close()
+            logger.info("PostgreSQL 连接池已关闭")
