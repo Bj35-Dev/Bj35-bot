@@ -25,68 +25,70 @@ logger = logging.getLogger(__name__)
 
 class PostgreSQLConnector:
     """PostgreSQL 数据库连接管理类，提供数据库操作的各种方法。"""
-    pool: Optional[asyncpg.Pool] = None
-    lock: Lock = Lock()
+    __pool: Optional[asyncpg.Pool] = None
+    __lock: Lock = Lock()
 
     @classmethod
     async def initialize(cls) -> None:
         """初始化数据库连接池"""
-        if cls.pool:
-            # 检查现有连接是否有效
-            try:
-                async with cls.pool.acquire() as conn:
-                    await conn.execute('SELECT 1')
-                logger.info("数据库连接池已存在且连接正常")
-                return
-            except asyncpg.PostgresError as e:
-                logger.warning("现有连接池出错，将重新创建: %s", str(e))
-                cls.pool = None
 
-        max_retries = 3
-        retry_count = 0
+        async with cls.__lock:
+            if cls.__pool:
+                # 检查现有连接是否有效
+                try:
+                    async with cls.__pool.acquire() as conn:
+                        await conn.execute('SELECT 1')
+                    logger.info("数据库连接池已存在且连接正常")
+                    return
+                except asyncpg.PostgresError as e:
+                    logger.warning("现有连接池出错，将重新创建: %s", str(e))
+                    cls.__pool = None
 
-        while retry_count < max_retries:
-            try:
-                cls.pool = await asyncpg.create_pool(
-                    user=settings.DB_USER,
-                    password=settings.DB_PASSWORD,
-                    database=settings.DB_NAME,
-                    host=settings.DB_HOST,
-                    port=settings.DB_PORT,
-                    min_size=settings.DB_POOL_MIN_SIZE,
-                    max_size=settings.DB_POOL_MAX_SIZE,
-                    ssl=settings.DB_SSL,
-                    timeout=60,
-                    command_timeout=60,
-                    max_inactive_connection_lifetime=300,
-                )
+            max_retries = 3
+            retry_count = 0
 
-                # 测试连接
-                async with cls.pool.acquire() as conn:
-                    await conn.execute('SELECT 1')
-                    logger.info("数据库连接成功")
+            while retry_count < max_retries:
+                try:
+                    cls.__pool = await asyncpg.create_pool(
+                        user=settings.DB_USER,
+                        password=settings.DB_PASSWORD,
+                        database=settings.DB_NAME,
+                        host=settings.DB_HOST,
+                        port=settings.DB_PORT,
+                        min_size=settings.DB_POOL_MIN_SIZE,
+                        max_size=settings.DB_POOL_MAX_SIZE,
+                        ssl=settings.DB_SSL,
+                        timeout=60,
+                        command_timeout=60,
+                        max_inactive_connection_lifetime=300,
+                    )
 
-                return
-            except (asyncpg.PostgresError, OSError) as e:
-                retry_count += 1
-                if retry_count >= max_retries:
-                    logger.error("PostgreSQL 连接失败，已重试 %d 次，退出", max_retries)
-                    raise DatabaseConnectionError(f"无法连接到 PostgreSQL 数据库: {str(e)}") from e
+                    # 测试连接
+                    async with cls.__pool.acquire() as conn:
+                        await conn.execute('SELECT 1')
+                        logger.info("数据库连接成功")
 
-                wait_time = 2 ** retry_count
-                logger.warning("PostgreSQL 连接失败，正在重试 %d/%d 次，等待 %d 秒: %s",
-                               retry_count, max_retries, wait_time, str(e))
-                await asyncio.sleep(wait_time)
+                    return
+                except (asyncpg.PostgresError, OSError) as e:
+                    retry_count += 1
+                    if retry_count >= max_retries:
+                        logger.error("PostgreSQL 连接失败，已重试 %d 次，退出", max_retries)
+                        raise DatabaseConnectionError(f"无法连接到 PostgreSQL 数据库: {str(e)}") from e
+
+                    wait_time = 2 ** retry_count
+                    logger.warning("PostgreSQL 连接失败，正在重试 %d/%d 次，等待 %d 秒: %s",
+                                retry_count, max_retries, wait_time, str(e))
+                    await asyncio.sleep(wait_time)
 
     @classmethod
     async def execute(cls, query: str, *args) -> None:
         """执行不返回结果的SQL语句"""
-        if not cls.pool:
+        if not cls.__pool:
             raise ValueError("数据库连接池尚未初始化")
 
-        async with cls.lock:
+        async with cls.__lock:
             try:
-                async with cls.pool.acquire() as conn:
+                async with cls.__pool.acquire() as conn:
                     await conn.execute(query, *args)
             except Exception as e:
                 logger.error("SQL执行失败: %s", str(e))
@@ -95,12 +97,12 @@ class PostgreSQLConnector:
     @classmethod
     async def fetch_one(cls, query: str, *args) -> Optional[Dict[str, Any]]:
         """执行查询并返回一条记录"""
-        if not cls.pool:
+        if not cls.__pool:
             raise ValueError("数据库连接池尚未初始化")
 
-        async with cls.lock:
+        async with cls.__lock:
             try:
-                async with cls.pool.acquire() as conn:
+                async with cls.__pool.acquire() as conn:
                     row = await conn.fetchrow(query, *args)
                     return dict(row) if row else None
             except Exception as e:
@@ -110,12 +112,12 @@ class PostgreSQLConnector:
     @classmethod
     async def fetch_all(cls, query: str, *args) -> list:
         """执行查询并返回所有记录"""
-        if not cls.pool:
+        if not cls.__pool:
             raise ValueError("数据库连接池尚未初始化")
 
-        async with cls.lock:
+        async with cls.__lock:
             try:
-                async with cls.pool.acquire() as conn:
+                async with cls.__pool.acquire() as conn:
                     rows = await conn.fetch(query, *args)
                     return [dict(row) for row in rows]
             except Exception as e:
@@ -125,12 +127,12 @@ class PostgreSQLConnector:
     @classmethod
     async def fetch_val(cls, query: str, *args) -> Any:
         """执行查询并返回单个值"""
-        if not cls.pool:
+        if not cls.__pool:
             raise ValueError("数据库连接池尚未初始化")
 
-        async with cls.lock:
+        async with cls.__lock:
             try:
-                async with cls.pool.acquire() as conn:
+                async with cls.__pool.acquire() as conn:
                     return await conn.fetchval(query, *args)
             except Exception as e:
                 logger.error("SQL查询失败: %s", str(e))
@@ -147,10 +149,10 @@ class PostgreSQLConnector:
                 await PostgreSQLConnector.execute("INSERT INTO ...")
                 await PostgreSQLConnector.execute("UPDATE ...")
         """
-        if not cls.pool:
+        if not cls.__pool:
             raise ValueError("数据库连接池尚未初始化")
 
-        conn = await cls.pool.acquire()
+        conn = await cls.__pool.acquire()
         tx = conn.transaction()
         try:
             await tx.start()
@@ -161,11 +163,11 @@ class PostgreSQLConnector:
             logger.error("事务执行失败，已回滚: %s", str(e))
             raise
         finally:
-            await cls.pool.release(conn)
+            await cls.__pool.release(conn)
 
     @classmethod
     async def close(cls) -> None:
         """关闭数据库连接池，释放资源"""
-        if cls.pool:
-            await cls.pool.close()
+        if cls.__pool:
+            await cls.__pool.close()
             logger.info("PostgreSQL 连接池已关闭")

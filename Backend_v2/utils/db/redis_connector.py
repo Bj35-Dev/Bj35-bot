@@ -11,6 +11,7 @@ Copyright (C) 2025 AptS:1547
 
 import logging
 from typing import Optional
+from asyncio import Lock
 
 import redis.asyncio as aioredis
 from redis.exceptions import RedisError
@@ -25,23 +26,27 @@ class RedisConnector:
     """Redis连接器类，提供异步Redis操作"""
 
     __pool: Optional[aioredis.ConnectionPool] = None
+    __lock: Lock = Lock()
 
     @classmethod
     async def initialize(cls) -> None:
         """初始化Redis连接池"""
-        try:
-            pool = await cls._get_pool()
-            # 验证连接
-            client = aioredis.Redis(connection_pool=pool)
-            await client.ping()
-            logger.info("Redis连接池已初始化")
-        except RedisError as e:
-            cls.__pool = None
-            raise RedisConnectionError(f"无法连接到Redis: {str(e)}") from e
+
+        async with cls.__lock:
+            try:
+                pool = await cls._get_pool()
+                # 验证连接
+                client = aioredis.Redis(connection_pool=pool)
+                await client.ping()
+                logger.info("Redis连接池已初始化")
+            except RedisError as e:
+                cls.__pool = None
+                raise RedisConnectionError(f"无法连接到Redis: {str(e)}") from e
 
     @classmethod
     async def _get_pool(cls) -> aioredis.ConnectionPool:
         """获取或创建Redis连接池"""
+
         if cls.__pool is None:
             try:
                 cls.__pool = aioredis.ConnectionPool.from_url(
