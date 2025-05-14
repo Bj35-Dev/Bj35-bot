@@ -6,7 +6,7 @@ Description: 这是在 v1 基础上重构的版本，主要改进了代码结构
 使用 GPLv3 许可证。
 Copyright (C) 2025 AptS:1547
 
-本文件定义了令牌管理服务，包括令牌的存储、加密、检查和更新等功能。
+本文件定义了 YunJi Access Token 令牌管理服务，包括令牌的存储、加密、检查和更新等功能。
 """
 import logging
 import json
@@ -30,7 +30,7 @@ from utils.exceptions import UpdateTokenError, TokenNotFoundError
 logger = logging.getLogger(__name__)
 
 class TokenManager:
-    """令牌管理服务，处理 access token 的存储、加密、检查和更新"""
+    """令牌管理服务，处理 YunJi Access Token 的存储、加密、检查和更新"""
 
     # 配置参数 - 使用相对路径
     TOKEN_DIR = Path("data")
@@ -90,10 +90,10 @@ class TokenManager:
                 with open(cls.TOKEN_FILE, 'w+', encoding="utf-8") as f:
                     yaml.dump(data_to_save, f)
 
-            logger.info("Token数据已保存到文件: %s", cls.TOKEN_FILE)
+            logger.info("YunJi Access Token 数据已保存到文件: %s", cls.TOKEN_FILE)
             return True
         except (IOError, yaml.YAMLError) as e:
-            logger.error("保存token数据失败: %s", str(e))
+            logger.error("保存 YunJi Access Token 数据失败: %s", str(e))
             return False
 
     @classmethod
@@ -153,7 +153,7 @@ class TokenManager:
             Optional[Dict]: token数据字典，如果加载失败则返回None
         """
         if not cls.TOKEN_FILE.exists():
-            logger.warning("Token文件不存在: %s", cls.TOKEN_FILE)
+            logger.warning("YunJi Access Token 文件不存在: %s", cls.TOKEN_FILE)
             return None
 
         try:
@@ -164,13 +164,13 @@ class TokenManager:
                     data = yaml.safe_load(f)
 
             if not data or "encrypted" not in data:
-                logger.error("Token文件格式无效")
+                logger.error("YunJi Access Token文件格式无效")
                 return None
 
             decrypted_data = cls._decrypt_data(data["encrypted"])
             return decrypted_data
         except (IOError, yaml.YAMLError) as e:
-            logger.error("加载token数据失败: %s", str(e))
+            logger.error("加载 YunJi Access Token 数据失败: %s", str(e))
             return None
 
     @classmethod
@@ -187,16 +187,16 @@ class TokenManager:
 
             # 如果没有过期时间或token，则强制更新
             if "expire_time" not in token_data or "access_token" not in token_data:
-                logger.info("未找到有效的token数据，开始生成新的access token")
+                logger.info("未找到有效的 YunJi Access Token 数据，开始生成新的 Token")
 
                 try:
                     # 尝试更新token
                     access_token, expiration = await cls._update_access_token()
                 except UpdateTokenError as e:
-                    logger.error("更新access token失败: %s", str(e))
+                    logger.error("更新 YunJi Access Token 失败: %s", str(e))
                     return False
 
-                logger.info("新的access token生成成功")
+                logger.info("新的 YunJi Access Token 生成成功")
 
                 expiration = int(datetime.strptime(expiration, "%Y-%m-%dT%H:%M:%S%z").timestamp())
 
@@ -213,13 +213,13 @@ class TokenManager:
 
             if expire_ts <= today:
                 # 如果过期时间在今天或之前，更新token
-                logger.info("Access token已过期，开始生成新的access token")
+                logger.info(" YunJi Access Token 已过期，开始生成新的 Token")
 
                 try:
                     # 尝试更新token
                     access_token, expiration = await cls._update_access_token()
 
-                    logger.info("新的access token生成成功")
+                    logger.info("新的 YunJi Access Token 生成成功")
 
                     expiration = int(datetime.strptime(expiration,
                                                        "%Y-%m-%dT%H:%M:%S%z").timestamp())
@@ -230,12 +230,12 @@ class TokenManager:
                         "expire_time": expiration
                     })
                 except UpdateTokenError as e:
-                    logger.error("更新access token失败: %s", str(e))
+                    logger.error("更新 YunJi Access Token 失败: %s", str(e))
                     return False
 
             return True
         except (IOError, yaml.YAMLError) as e:
-            logger.error("检查或更新access token时出错：%s", str(e))
+            logger.error("检查或更新 YunJi Access Token 时出错：%s", str(e))
             return False
 
     @classmethod
@@ -244,15 +244,15 @@ class TokenManager:
         try:
             token_data = cls.load_token_data()
             if not token_data or "expire_time" not in token_data:
-                logger.warning("没有找到token过期信息")
+                logger.warning("没有找到 YunJi Access Token 过期信息")
                 return
 
             expiration_ts = int(token_data["expire_time"])
             current_ts = datetime.now().timestamp()
             days_remaining = (expiration_ts - current_ts) / (60 * 60 * 24)
-            logger.info("Access token将在 %.2f 天后过期", days_remaining)
+            logger.info("YunJi Access Token 将在 %.2f 天后过期", days_remaining)
         except (IOError, yaml.YAMLError) as e:
-            logger.error("获取token过期时间失败：%s", str(e))
+            logger.error("获取 YunJi Access Token 过期时间失败：%s", str(e))
 
     @classmethod
     async def get_valid_token(cls) -> bool:
@@ -275,5 +275,5 @@ class TokenManager:
             return False
 
         except (IOError, yaml.YAMLError) as e:
-            logger.error("读取token失败: %s", str(e))
+            logger.error("读取 YunJi Access Token 失败: %s", str(e))
             return False
