@@ -1,16 +1,25 @@
 <template>
   <section class="text-gray-600 body-font">
-    <div class="container px-5 py-24 mx-auto">
+    <div class="container px-5 py-3 mx-auto">
       <div class="flex">
         <!-- 左侧技术栈滚动展示 -->
-        <div class="w-3/8 pr-8">
+        <div class="w-3/8 pr-8 flex flex-col justify-center"> <!-- 添加 flex 和居中 -->
+          <h2 class="text-xl font-medium title-font mb-8 text-gray-900">Tech Stack</h2>
           <div class="tech-stack">
             <div v-for="(row, index) in tagRows" :key="index" class="scroller-group">
               <div class="scroller"
                    :class="{ 'scroll-reverse': row.direction === 'right' }"
                    :style="{ '--duration': row.duration + 's' }">
                 <div class="tag-list">
-                  <span v-for="tag in row.tags" :key="tag" class="tag">{{ tag }}</span>
+                  <span v-for="tag in row.tags"
+                        :key="tag"
+                        class="tag"
+                        :style="{
+                          backgroundColor: row.colors.background,
+                          color: row.colors.text
+                        }">
+                    {{ tag }}
+                  </span>
                 </div>
                 <div class="tag-list" aria-hidden="true">
                   <span v-for="tag in row.tags" :key="tag + '-clone'" class="tag">{{ tag }}</span>
@@ -77,38 +86,68 @@ export default {
         {
           tags: ['Vue.js', 'Vite', 'HTML', 'CSS', 'CORS', 'Tailwind', 'RESTFUL API', 'yarn', 'i18n'],
           direction: 'left',
-          duration: 20
+          duration: 20,
+          colors: {
+            background: '#f0fdf4',
+            text: '#166534'
+          }
         },
         {
           tags: ['JavaScript', 'Python', 'Quart', 'JWT', 'async', 'pydantic', 'asncpg', 'oauth2', 'Wecom'],
           direction: 'right',
-          duration: 15
+          duration: 15,
+          colors: {
+            background: '#eff6ff',
+            text: '#1e40af'
+          }
         },
         {
           tags: ['Docker', 'Compose', 'Jenkins', 'Nginx', 'Jumpserver', 'golocproxy', 'PostgreSQL'],
           direction: 'left',
-          duration: 22
+          duration: 22,
+          colors: {
+            background: '#fdf4ff',
+            text: '#86198f'
+          }
         }
       ],
       team: [
-        {
-          name: 'Zhicheng Dong',
-          position: 'All Stack Developer',
-          description: '',
-          image: 'https://avatars.githubusercontent.com/u/163859507',
-          github: 'https://github.com/cg8-5712',
-          telegram: 'cg85712.t.me',
-          website: '5712.cg8@gmail.com'
-        },
-        {
-          name: 'Yuhan Bian',
-          position: 'Full-Stack Developer',
-          description: '当你不知道做什么的时候，就重构吧',
-          image: 'https://cn.cravatar.com/avatar/f42f9f288e5ba41aef369b4edd3c5f5c?d=retro&s=512',
-          github: 'https://github.com/AptS-1547',
-          telegram: 'https://t.me/AptS1547',
-          website: 'https://www.esaps.net'
-        }
+          {
+            name: 'Yuhan Bian',
+            position: 'Full-Stack Developer',
+            description: '当你不知道做什么的时候，就重构吧',
+            image: 'https://cn.cravatar.com/avatar/f42f9f288e5ba41aef369b4edd3c5f5c?d=retro&s=512',
+            github: 'https://github.com/AptS-1547',
+            telegram: 'https://t.me/AptS1547',
+            website: 'https://www.esaps.net'
+          },
+          {
+            name: 'Zhicheng Dong',
+            position: 'Full-Stack Developer',
+            description: 'Nothing is impossible with Docker.！',
+            image: 'https://cn.cravatar.com/avatar/4ca6db8f5673f5f001c5901fc04b2322ff304b13c9b805576ddf47e310a481dc?s=512',
+            github: 'https://github.com/cg8-5712',
+            telegram: 'http://cg85712.t.me',
+            website: 'mailto:5712.cg8@gmail.com'
+          },
+          {
+            name: 'Yuhe Cheng',
+            position: 'Backend Developer',
+            description: '前OI选手, 技术栈：python、C/C++, 擅长后端代码开发工作，但被强迫转型运维',
+            image: 'https://avatars.githubusercontent.com/u/112048581',
+            github: 'https://github.com/0515wlx',
+            telegram: 'mailto:chengyuhe519@163.com',
+            website: 'mailto:chengyuhe519@163.com'
+          },
+          {
+            name: 'Lixuan Wei',
+            position: 'Backend Developer',
+            description: 'HPCer深度学习研究员，AI agent开发者。技术栈：python、C、cuda、C++擅长开发进程中的人文问题，提高资源利用率',
+            image: 'https://avatars.githubusercontent.com/u/162896209',
+            github: 'https://github.com/0515wlx',
+            telegram: 'mailto:wlx20082022@163.com',
+            website: 'mailto:wlx20082022@163.com'
+          },
       ]
     }
   }
@@ -148,17 +187,15 @@ export default {
 .tag {
   display: inline-block;
   padding: 0.5rem 1rem;
-  background: #f3f4f6;
   border-radius: 9999px;
-  color: #4b5563;
   font-size: 0.875rem;
   white-space: nowrap;
   transition: all 0.2s ease;
 }
 
 .tag:hover {
-  background: #e5e7eb;
   transform: translateY(-1px);
+  filter: brightness(0.95);
 }
 
 .scroller-group:hover .scroller {
