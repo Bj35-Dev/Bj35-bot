@@ -18,7 +18,7 @@ from contextlib import asynccontextmanager
 import asyncpg
 
 from utils.settings import settings
-from utils.exceptions import DatabaseConnectionError
+from utils.exceptions import DatabaseConnectionError, DatabasePoolError
 
 logger = logging.getLogger(__name__)
 
@@ -81,10 +81,17 @@ class PostgreSQLConnector:
                     await asyncio.sleep(wait_time)
 
     @classmethod
+    def get_pool(cls) -> asyncpg.Pool:
+        """获取数据库连接池"""
+        if not cls.__pool:
+            raise DatabasePoolError("数据库连接池尚未初始化，请先调用 initialize() 方法")
+        return cls.__pool
+
+    @classmethod
     async def execute(cls, query: str, *args) -> None:
         """执行不返回结果的SQL语句"""
         if not cls.__pool:
-            raise ValueError("数据库连接池尚未初始化")
+            raise DatabasePoolError("数据库连接池尚未初始化")
 
         async with cls.__lock:
             try:
@@ -98,7 +105,7 @@ class PostgreSQLConnector:
     async def fetch_one(cls, query: str, *args) -> Optional[Dict[str, Any]]:
         """执行查询并返回一条记录"""
         if not cls.__pool:
-            raise ValueError("数据库连接池尚未初始化")
+            raise DatabasePoolError("数据库连接池尚未初始化")
 
         async with cls.__lock:
             try:
@@ -113,7 +120,7 @@ class PostgreSQLConnector:
     async def fetch_all(cls, query: str, *args) -> list:
         """执行查询并返回所有记录"""
         if not cls.__pool:
-            raise ValueError("数据库连接池尚未初始化")
+            raise DatabasePoolError("数据库连接池尚未初始化")
 
         async with cls.__lock:
             try:
@@ -128,7 +135,7 @@ class PostgreSQLConnector:
     async def fetch_val(cls, query: str, *args) -> Any:
         """执行查询并返回单个值"""
         if not cls.__pool:
-            raise ValueError("数据库连接池尚未初始化")
+            raise DatabasePoolError("数据库连接池尚未初始化")
 
         async with cls.__lock:
             try:
@@ -150,7 +157,7 @@ class PostgreSQLConnector:
                 await PostgreSQLConnector.execute("UPDATE ...")
         """
         if not cls.__pool:
-            raise ValueError("数据库连接池尚未初始化")
+            raise DatabasePoolError("数据库连接池尚未初始化")
 
         conn = await cls.__pool.acquire()
         tx = conn.transaction()

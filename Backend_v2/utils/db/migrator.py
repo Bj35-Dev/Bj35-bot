@@ -25,19 +25,21 @@ class DatabaseMigrator:
     async def ensure_migrations_table():
         """确保 migrations 表存在"""
         try:
-            await PostgreSQLConnector.execute("""
-                CREATE TABLE IF NOT EXISTS migrations (
-                    id SERIAL PRIMARY KEY,
-                    version VARCHAR(50) NOT NULL UNIQUE,
-                    description TEXT,
-                    applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
+            async with PostgreSQLConnector.transaction():
+                await PostgreSQLConnector.execute("""
+                    CREATE TABLE IF NOT EXISTS migrations (
+                        id SERIAL PRIMARY KEY,
+                        version VARCHAR(50) NOT NULL UNIQUE,
+                        description TEXT,
+                        applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+
             logger.debug("已确认 migrations 表存在")
             return True
         except Exception as e:
             logger.error("创建 migrations 表失败: %s", e)
-            return False
+            raise
 
     @staticmethod
     def get_migrations_path() -> Path:
@@ -63,7 +65,7 @@ class DatabaseMigrator:
             return [row['version'] for row in result]
         except Exception as e:
             logger.error("获取已应用迁移失败: %s", e)
-            return []
+            raise
 
     @staticmethod
     def get_available_migrations() -> List[Tuple[str, Path, str]]:
@@ -143,9 +145,9 @@ class DatabaseMigrator:
                     logger.info("迁移 %s 应用成功", version)
                 except Exception as e:
                     logger.error("应用迁移 %s 失败: %s", version, str(e))
-                    return False
+                    raise
 
             return True
         except Exception as e:
             logger.error("应用迁移过程失败: %s", str(e))
-            return False
+            raise
