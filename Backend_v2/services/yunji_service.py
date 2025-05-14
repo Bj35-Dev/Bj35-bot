@@ -229,11 +229,14 @@ class YunjiService:
             logger.info('位置 %s 任务执行结果: %s', location, res)
 
             while True:
-                await asyncio.sleep(1)
-
+                
                 # 获取设备实时状态
+                await asyncio.sleep(1)
                 status = await cls.check_lockers_status(cabin_id)
+
+                await asyncio.sleep(1)
                 current_pos = await cls.get_current_position_marker(chassis_id)
+                
                 logger.debug('门状态: %s，当前位置: %s', status, current_pos)
 
                 # 状态处理逻辑
