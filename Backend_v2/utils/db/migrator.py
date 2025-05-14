@@ -1,8 +1,12 @@
 """
 Bj35 Bot v2
-数据库迁移管理器
+Refactor by: AptS:1547
+Date: 2025-05-14
+Description: 这是在 v1 基础上重构的版本，主要改进了代码结构和可读性。
+使用 GPLv3 许可证。
+Copyright (C) 2025 AptS:1547
 
-负责管理数据库版本和应用迁移
+本文件定义了DatabaseMigrator类，用于管理数据库迁移。
 """
 
 import re
@@ -26,10 +30,10 @@ class DatabaseMigrator:
                     id SERIAL PRIMARY KEY,
                     version VARCHAR(50) NOT NULL UNIQUE,
                     description TEXT,
-                    applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 )
             """)
-            logger.info("已确认 migrations 表存在")
+            logger.debug("已确认 migrations 表存在")
             return True
         except Exception as e:
             logger.error("创建 migrations 表失败: %s", e)
@@ -97,7 +101,7 @@ class DatabaseMigrator:
 
             # 获取已应用的迁移
             applied_migrations = await DatabaseMigrator.get_applied_migrations()
-            logger.info("已应用的迁移: %s", applied_migrations)
+            logger.debug("已应用的迁移: %s", applied_migrations)
 
             # 获取所有可用迁移
             available_migrations = DatabaseMigrator.get_available_migrations()

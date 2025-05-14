@@ -90,12 +90,13 @@ async def init_db():
     """初始化数据库连接"""
     try:
         await PostgreSQLConnector.initialize()
-        await RedisConnector.initialize()
-
         await DatabaseInitializer.initialize_database()
         await DatabaseMigrator.apply_migrations()
+        logging.info("PostgreSQL 数据库连接初始化成功")
 
-        logging.info("数据库连接初始化成功")
+        await RedisConnector.initialize()
+        logging.info("Redis 数据库连接初始化成功")
+
     except DatabaseConnectionError as e:
         logging.error("数据库初始化失败: %s", e)
         if settings.ENV == 'development':

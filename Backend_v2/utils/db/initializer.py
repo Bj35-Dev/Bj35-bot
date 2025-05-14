@@ -1,14 +1,15 @@
 """
 Bj35 Bot v2
 Refactor by: AptS:1547
-Date: 2025-04-19
-Description: 数据库初始化模块
+Date: 2025-05-14
+Description: 这是在 v1 基础上重构的版本，主要改进了代码结构和可读性。
+使用 GPLv3 许可证。
+Copyright (C) 2025 AptS:1547
 
 本文件负责数据库的初始化，包括创建表、添加索引等操作。
 """
 
 import logging
-from typing import List
 from pathlib import Path
 
 from utils.db.postgresql_connector import PostgreSQLConnector

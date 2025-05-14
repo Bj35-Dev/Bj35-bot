@@ -1,6 +1,6 @@
 -- Bj35 Bot v2 数据库结构
 -- 版本号: 1.0.0
--- 创建日期: 2025-04-19
+-- 创建日期: 2025-05-14
 -- 作者: AptS:1547
 
 -- 迁移版本表 - 用于跟踪数据库结构的版本
@@ -31,13 +31,11 @@ CREATE TABLE IF NOT EXISTS userinfo (
 -- 目标位置表 - 存储系统中所有可用的位置信息
 CREATE TABLE IF NOT EXISTS target_locations (
     id SERIAL PRIMARY KEY,
-    code VARCHAR(50) NOT NULL UNIQUE,
-    name VARCHAR(100) NOT NULL,
-    building VARCHAR(10),
-    floor INTEGER,
-    type VARCHAR(50),
+    location VARCHAR(100) NOT NULL,
+    description TEXT,
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 注: 上面的target_locations表对应settings.py中的TARGET_LIST
