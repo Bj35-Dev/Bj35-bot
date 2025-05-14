@@ -99,6 +99,15 @@ export default {
           github: 'https://github.com/cg8-5712',
           telegram: 'cg85712.t.me',
           website: '5712.cg8@gmail.com'
+        },
+        {
+          name: 'Yuhan Bian',
+          position: 'Full-Stack Developer',
+          description: '当你不知道做什么的时候，就重构吧',
+          image: 'https://cn.cravatar.com/avatar/f42f9f288e5ba41aef369b4edd3c5f5c?d=retro&s=512',
+          github: 'https://github.com/AptS-1547',
+          telegram: 'https://t.me/AptS1547',
+          website: 'https://www.esaps.net'
         }
       ]
     }
