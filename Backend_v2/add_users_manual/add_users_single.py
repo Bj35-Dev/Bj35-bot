@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 
 # 数据库配置
 DB_CONFIG = {
-    'host': 'your_postgresql_host',
+    'host': "10.4.2.33",
     'port': 5432,
     'user': 'postgres',
-    'password': 'your_password',
+    'password': 'NnK%AXCQKCYTGtzF',
     'database': 'bj35bot',
 }
 
@@ -89,10 +89,10 @@ async def add_user(data: Dict[str, Any]) -> Dict[str, bool]:
                     INSERT INTO userinfo (wecom, wecom_id, name, password, department, 
                                         position, mobile, language, email, avatar_text)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                    RETURNING uid
+                    RETURNING id
                 ''', wecom, wecom_id, name, password, department, position,
                                           mobile, language, email, avatar_text)
-        logger.info("用户信息已添加: %s (uid: %s)", name, wecom_id)
+        logger.info("用户信息已添加: %s (id: %s)", name, wecom_id)
         return {'success': True}
     except Exception as e:
         logger.error("添加用户失败: %s", str(e))
@@ -105,7 +105,7 @@ async def main():
     test_user = {
         'name': 'cg8',
         'wecom_id': "5712",
-        'password': 'dzc20070818',
+        'password': 'Dzc20070818',
         'telephone': '13800138000',
         'department': '测试部门',
         'position': 'C206',
