@@ -43,7 +43,7 @@ def register_routes(app):
 
         # 根据API返回的数据进行处理
         if update_response['success']:
-            logger.info("%s updated profile successfully!", data['username'])
+            logger.info("%s updated profile successfully!", data['name_old'])
             return jsonify(
                 {'success': True, 'message': 'Profile updated successfully!'}), 200
         return jsonify(
@@ -63,7 +63,7 @@ def register_routes(app):
         return jsonify(
         {'success': False, 'message': update_response['message']}), 400
 
-    @app.route(URI_PREFIX + '/update_user_password', methods=['POST'])
+    @app.route(URI_PREFIX + '/change-password', methods=['POST'])
     @jwt_required
     async def update_user_password():
         data = await request.json
@@ -77,10 +77,10 @@ def register_routes(app):
                 'message': '缺少必要参数'
             }), 422
 
-        # 先验证原密码是否正确
         try:
-            stored_password = await UserService.get_password_by_username(wecom_id, 'wecom_id')
-            if stored_password != old_password:
+            # 使用 verify_user_credentials 验证原密码
+            verification_result = await UserService.verify_user_credentials(wecom_id, old_password)
+            if not verification_result:
                 logger.warning("用户 %s 原密码验证失败", wecom_id)
                 return jsonify({
                     'success': False,
@@ -89,7 +89,7 @@ def register_routes(app):
 
             # 更新新密码
             update_response = await UserService.update_userinfo({
-                'wecom_id': wecom_id,
+                'name_old': wecom_id,  # 确保使用正确的标识字段
                 'password': new_password
             })
 

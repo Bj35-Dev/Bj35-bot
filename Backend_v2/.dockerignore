@@ -44,3 +44,7 @@ ENV/
 *.bak
 *.tmp
 *~
+
+# 忽略 poetry 文件
+pyproject.toml
+poetry.lock

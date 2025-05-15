@@ -1,7 +1,7 @@
 """
 Bj35 Bot v2
 Refactor by: AptS:1547
-Date: 2025-04-19
+Date: 2025-05-14
 Description: 这是在 v1 基础上重构的版本，主要改进了代码结构和可读性。
 使用 GPLv3 许可证。
 Copyright (C) 2025 AptS:1547
@@ -11,8 +11,9 @@ Copyright (C) 2025 AptS:1547
 
 import logging
 from typing import Optional
+from asyncio import Lock
 
-import redis.asyncio as redis
+import redis.asyncio as aioredis
 from redis.exceptions import RedisError
 
 from utils.settings import settings
@@ -24,52 +25,48 @@ logger = logging.getLogger(__name__)
 class RedisConnector:
     """Redis连接器类，提供异步Redis操作"""
 
-    __pool: Optional[redis.ConnectionPool] = None
-    __client: Optional[redis.Redis] = None
+    __pool: Optional[aioredis.ConnectionPool] = None
+    __lock: Lock = Lock()
 
     @classmethod
     async def initialize(cls) -> None:
         """初始化Redis连接池"""
-        if cls.__pool is None:
-            cls.__pool = await cls._get_pool()
 
-            conn = redis.Redis(connection_pool=cls.__pool)
+        async with cls.__lock:
             try:
-                await conn.ping()
+                pool = await cls._get_pool()
+                # 验证连接
+                client = aioredis.Redis(connection_pool=pool)
+                await client.ping()
+                logger.info("Redis连接池已初始化")
             except RedisError as e:
                 cls.__pool = None
-                logger.error("Redis连接池初始化失败: %s", str(e))
                 raise RedisConnectionError(f"无法连接到Redis: {str(e)}") from e
 
-            logger.info("Redis连接池已初始化")
-        else:
-            logger.warning("Redis连接池已存在，跳过初始化")
-
     @classmethod
-    async def _get_pool(cls) -> redis.ConnectionPool:
+    async def _get_pool(cls) -> aioredis.ConnectionPool:
         """获取或创建Redis连接池"""
+
         if cls.__pool is None:
             try:
-                cls.__pool = redis.ConnectionPool.from_url(
+                cls.__pool = aioredis.ConnectionPool.from_url(
                     url=settings.REDIS_URL,
                     password=settings.REDIS_PASSWORD,
                     max_connections=settings.REDIS_POOL_MAX_SIZE,
                     encoding="utf-8",
                 )
 
-                logger.info("Redis连接池初始化成功")
+                logger.debug("Redis初始化连接池成功: %s", cls.__pool)
             except RedisError as e:
-                logger.error("Redis连接池初始化失败: %s", str(e))
                 raise RedisConnectionError(f"无法连接到Redis: {str(e)}") from e
+
         return cls.__pool
 
     @classmethod
-    async def _get_client(cls) -> redis.Redis:
+    async def _get_client(cls) -> aioredis.Redis:
         """获取Redis客户端实例"""
-        if cls.__client is None:
-            pool = await cls._get_pool()
-            cls.__client = redis.Redis(connection_pool=pool)
-        return cls.__client
+        pool = await cls._get_pool()
+        return aioredis.Redis(connection_pool=pool)
 
     @classmethod
     async def close(cls) -> None:

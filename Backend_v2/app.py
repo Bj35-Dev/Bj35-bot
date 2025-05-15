@@ -19,7 +19,7 @@ from quart_cors import cors
 from quart_jwt_extended import JWTManager
 
 from utils.settings import settings
-from utils import PostgreSQLConnector, RedisConnector
+from utils.db import PostgreSQLConnector, RedisConnector, DatabaseInitializer, DatabaseMigrator
 from utils.exceptions import DatabaseConnectionError, RedisConnectionError
 from utils import configure_jwt_handlers
 from services import TokenManager
@@ -90,19 +90,23 @@ async def init_db():
     """初始化数据库连接"""
     try:
         await PostgreSQLConnector.initialize()
+        await DatabaseInitializer.initialize_database()
+        await DatabaseMigrator.apply_migrations()
+        logging.info("PostgreSQL 数据库连接初始化成功")
+
         await RedisConnector.initialize()
-        logging.info("数据库连接初始化成功")
-        return True
+        logging.info("Redis 数据库连接初始化成功")
+
     except DatabaseConnectionError as e:
+        logging.error("数据库初始化失败: %s", e)
         if settings.ENV == 'development':
-            logging.error("数据库初始化失败: %s", e)
-            return True
-        return False
+            return
+        raise
     except RedisConnectionError as e:
+        logging.error("Redis初始化失败: %s", e)
         if settings.ENV == 'development':
-            logging.error("Redis初始化失败: %s", e)
-            return True
-        return False
+            return
+        raise
 
 
 @app.before_serving
@@ -130,8 +134,9 @@ async def before_serving():
     """
     logging.info("\n%s", ascii_art)
 
-    if await init_db():
-        logging.info("数据库连接成功")
+    logging.info("正在初始化数据库连接...")
+    await init_db()
+
     if await TokenManager.get_valid_token():
         TokenManager.log_token_expiry()
         logging.info("获取有效的token成功")

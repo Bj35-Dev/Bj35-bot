@@ -54,6 +54,7 @@ def register_routes(app):
                 user_claims={
                     'username': user_info['name'],
                     'role': user_info['department'],
+                    'wecom_id': user_info['wecom_id'],
                 }
             )
             logger.info("User %s logged in successfully", username)

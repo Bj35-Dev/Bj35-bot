@@ -162,11 +162,11 @@ function handleControlRobot(robot) {
   emit('control-robot', robot)
 }
 
-function startAutoRefresh() {
-  refreshTimer = setInterval(() => {
-    fetchRobots()
-  }, REFRESH_INTERVAL)
-}
+// function startAutoRefresh() {
+//   refreshTimer = setInterval(() => {
+//     fetchRobots()
+//   }, REFRESH_INTERVAL)
+// }
 
 // 生命周期钩子
 onMounted(() => {

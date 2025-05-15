@@ -9,7 +9,8 @@ Copyright (C) 2025 AptS:1547
 本文件是 Bj35 Bot v2 的路由模块的初始化文件。
 """
 
-from . import index, auth_routes, robot_routes, task_routes, user_routes, message_routes
+from . import index, auth_routes, robot_routes, task_routes, user_routes, message_routes, admin_routes
+
 
 def register_all_routes(app):
     """注册所有路由到应用实例"""
@@ -19,3 +20,4 @@ def register_all_routes(app):
     task_routes.register_routes(app)
     user_routes.register_routes(app)
     message_routes.register_routes(app)
+    admin_routes.register_routes(app)
