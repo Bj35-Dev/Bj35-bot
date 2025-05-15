@@ -43,18 +43,23 @@ class WeComService:
             return cls.__access_token
 
         logger.debug("缓存的token已过期或不存在，开始请求新token")
-        url = cls.__BASE_URL + f"/gettoken?corpid={settings.WECOM_CORP_ID}&corpsecret={settings.WECOM_SECRET}"
+        url = cls.__BASE_URL + \
+            f"/gettoken?corpid={settings.WECOM_CORP_ID}&corpsecret={settings.WECOM_SECRET}"
 
         async with aiohttp.ClientSession() as session:
-            logger.debug("发送GET请求到: %s", url.replace(settings.WECOM_SECRET, '*' * 8))
+            logger.debug("发送GET请求到: %s", url.replace(
+                settings.WECOM_SECRET, '*' * 8))
             async with session.get(url) as response:
                 result = await response.json()
-                logger.debug("获取到响应: %s", {k: v if k != 'access_token' else '***' for k, v in result.items()})
+                logger.debug("获取到响应: %s", {
+                             k: v if k != 'access_token' else '***' for k, v in result.items()})
 
                 if result.get("errcode") == 0:
                     cls.__access_token = result.get("access_token")
-                    cls.__token_expire_time = current_time + result.get("expires_in")
-                    logger.debug("成功获取新token，将在%d秒后过期", result.get("expires_in"))
+                    cls.__token_expire_time = current_time + \
+                        result.get("expires_in")
+                    logger.debug("成功获取新token，将在%d秒后过期",
+                                 result.get("expires_in"))
                     return cls.__access_token
 
         error_msg = f"获取access_token失败: {result}"
@@ -101,10 +106,12 @@ class WeComService:
         logger.debug("开始生成OAuth授权URL")
 
         corp_id = settings.WECOM_CORP_ID
-        redirect_uri = quote(settings.WECOM_REDIRECT_URI, safe='')
+        redirect_uri = quote(settings.WECOM_FRONTEND_URL, safe='') + \
+            settings.URI_PREFIX + "/auth/wecom/callback"
         agent_id = settings.WECOM_AGENT_ID
 
-        state = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=16))
+        state = ''.join(random.choices(
+            'abcdefghijklmnopqrstuvwxyz0123456789', k=16))
         logger.debug("生成随机state: %s", state)
 
         success = await RedisConnector.store_oauth_state(state)
@@ -166,7 +173,8 @@ class WeComService:
     async def __get_user_id(cls, access_token, code):
         """通过授权码获取用户ID"""
         logger.debug("开始通过code获取用户ID: %s", code)
-        url = cls.__BASE_URL + f"/auth/getuserinfo?access_token={access_token}&code={code}"
+        url = cls.__BASE_URL + \
+            f"/auth/getuserinfo?access_token={access_token}&code={code}"
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -193,7 +201,8 @@ class WeComService:
     async def __get_user_detail(cls, access_token, userid):
         """获取用户基本信息"""
         logger.debug("开始获取用户详细信息: %s", userid)
-        url = cls.__BASE_URL + f"/user/get?access_token={access_token}&userid={userid}"
+        url = cls.__BASE_URL + \
+            f"/user/get?access_token={access_token}&userid={userid}"
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -223,7 +232,8 @@ class WeComService:
     async def __get_sensitive_info(cls, access_token, user_ticket):
         """获取用户敏感信息"""
         logger.debug("开始获取用户敏感信息")
-        url = cls.__BASE_URL + f"/user/getuserdetail?access_token={access_token}"
+        url = cls.__BASE_URL + \
+            f"/user/getuserdetail?access_token={access_token}"
         data = {"user_ticket": user_ticket}
 
         try:
