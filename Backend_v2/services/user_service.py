@@ -153,11 +153,13 @@ class UserService:
                 UPDATE userinfo
                 SET {', '.join(updates)}
                 WHERE wecom_id = ${param_index}
-                RETURNING *
             """
             values.append(name_old)
 
-            result = await PostgreSQLConnector.fetch_one(sql, *values)
+            # TODO: 这里应该用 execute() 而不是 fetch_one()
+            async with PostgreSQLConnector.transaction():
+                result = await PostgreSQLConnector.fetch_one(sql, *values)
+
             if result:
                 logger.info("已更新用户信息: %s", {
                     'name': result.get('name'),
