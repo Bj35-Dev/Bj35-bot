@@ -96,8 +96,11 @@ async function validateToken(token) {
 
 onMounted(() => {
   const token = route.query.token
+  const error = route.query.error
   if (token) {
     validateToken(token)
+  } else if (error) {
+    NotificationService.notify('登录失败：' + error, 'error')
   }
 })
 
