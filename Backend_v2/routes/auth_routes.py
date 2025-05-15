@@ -22,6 +22,7 @@ from utils.settings import settings
 logger = logging.getLogger(__name__)
 
 URI_PREFIX = settings.URI_PREFIX
+JWT_EXPIRY_WECOM = datetime.timedelta(days=30)
 JWT_EXPIRY_REMEMBER = datetime.timedelta(weeks=1)
 JWT_EXPIRY_DEFAULT = datetime.timedelta(days=1)
 
@@ -115,10 +116,9 @@ def register_routes(app):
             })
 
         # 创建JWT令牌
-        expires_delta = JWT_EXPIRY_REMEMBER  # 使用记住我的过期时间
         access_token = create_access_token(
             identity=user_info.get('userid'),
-            expires_delta=expires_delta,
+            expires_delta=JWT_EXPIRY_WECOM,
             user_claims={
                 'username': user_info.get('name'),
                 'role': user_info.get('department'),

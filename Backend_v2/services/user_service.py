@@ -128,7 +128,7 @@ class UserService:
             raise
 
     @staticmethod
-    async def update_userinfo(data: Dict[str, Any]) -> Dict[str, bool]:
+    async def update_userinfo(data: Dict[str, Any]) -> Dict[str, bool | str]:
         """更新用户信息"""
         try:
             name_old = data.get('name_old', '')
