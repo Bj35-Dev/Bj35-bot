@@ -22,7 +22,7 @@
             class="size-6 mr-1"
             aria-hidden="false"
           />
-          {{ item.name }}
+          {{ $t(`profile.${item.name.toLowerCase()}`) }}
         </a>
       </nav>
       <div class="flex flex-1 items-center justify-end gap-x-8">
@@ -34,7 +34,7 @@
       <DialogPanel class="fixed inset-y-0 left-0 z-50 w-full overflow-y-auto bg-white px-4 pb-6 sm:max-w-sm sm:px-6 sm:ring-1 sm:ring-gray-900/10">
         <div class="-ml-0.5 flex h-16 items-center gap-x-6">
           <button type="button" class="-m-2.5 p-2.5 text-gray-700" @click="mobileMenuOpen = false">
-            <span class="sr-only">Close menu</span>
+            <span class="sr-only">{{ $t('common.close') }}</span>
             <XMarkIcon class="size-6" aria-hidden="true" />
           </button>
           <div class="-ml-0.5">
@@ -58,7 +58,7 @@
               :class="[item.current ? 'text-indigo-600' : 'text-gray-400', 'size-6 shrink-0 mr-1']"
               aria-hidden="true"
             />
-            {{ item.name }}
+            {{ $t(`profile.${item.name.toLowerCase()}`) }}
           </a>
         </div>
       </DialogPanel>
@@ -66,7 +66,7 @@
   </header>
 
   <div class="max-w-7xl lg:px-16 pt-16">
-    <h1 class="sr-only">General Settings</h1>
+    <h1 class="sr-only">{{ $t('settings.profile') }}</h1>
     <main class="px-4 py-16 sm:px-0 lg:px-0 lg:py-20">
       <div v-if="!showChangePassword">
         <div class="flex justify-end mb-8">
@@ -82,10 +82,10 @@
         </div>
         <div class="mx-auto max-w-2xl space-y-16 sm:space-y-20">
           <div>
-            <h2 class="text-base font-semibold text-gray-900">Profile</h2>
+            <h2 class="text-base font-semibold text-gray-900">{{ $t('profile.title') }}</h2>
             <dl class="mt-6 divide-y divide-gray-100 border-t border-gray-200 text-sm">
               <div v-for="(value, key) in profileData" :key="key" class="py-6 sm:flex">
-                <dt class="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">{{ key }}</dt>
+                <dt class="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">{{ $t(`profile.personalInfo.${key.toLowerCase().replace(/\s+/g, '')}`) }}</dt>
                 <dd class="mt-1 flex justify-between gap-x-6 sm:mt-0 sm:flex-auto">
                   <div class="text-gray-900 flex items-center">
                     <template v-if="editingField === key">
@@ -108,7 +108,7 @@
                       class="font-semibold text-indigo-600 hover:text-indigo-500"
                       @click="editingField === key ? saveField(key) : updateField(key)"
                     >
-                      {{ editingField === key ? "Save" : "Update" }}
+                      {{ editingField === key ? $t('profile.actions.save') : $t('profile.actions.update') }}
                     </button>
                   </div>
                 </dd>
@@ -116,11 +116,11 @@
             </dl>
           </div>
           <div>
-            <h2 class="text-base font-semibold text-gray-900">Language and dates</h2>
-            <p class="mt-1 text-sm text-gray-500">Choose what language and date format to use throughout your account.</p>
+            <h2 class="text-base font-semibold text-gray-900">{{ $t('profile.languageAndDates.title') }}</h2>
+            <p class="mt-1 text-sm text-gray-500">{{ $t('profile.languageAndDates.description') }}</p>
             <dl class="mt-6 divide-y divide-gray-100 border-t border-gray-200 text-sm">
               <div class="py-6 sm:flex">
-                <dt class="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Language</dt>
+                <dt class="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">{{ $t('profile.languageAndDates.language') }}</dt>
                 <dd class="mt-1 flex justify-between gap-x-6 sm:mt-0 sm:flex-auto">
                   <div class="text-gray-900">
                     <template v-if="editingLanguage">
@@ -133,20 +133,20 @@
                     </template>
                   </div>
                   <button type="button" @click="toggleLanguageEdit" class="font-semibold text-indigo-600 hover:text-indigo-500">
-                    {{ editingLanguage ? "Save" : "Update" }}
+                    {{ editingLanguage ? $t('profile.actions.save') : $t('profile.actions.update') }}
                   </button>
                 </dd>
               </div>
               <div class="py-6 sm:flex">
-                <dt class="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Date format</dt>
+                <dt class="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">{{ $t('profile.languageAndDates.dateFormat') }}</dt>
                 <dd class="mt-1 flex justify-between gap-x-6 sm:mt-0 sm:flex-auto">
                   <div class="text-gray-900">DD-MM-YYYY</div>
-                  <button type="button" class="font-semibold text-indigo-600 hover:text-indigo-500">Update</button>
+                  <button type="button" class="font-semibold text-indigo-600 hover:text-indigo-500">{{ $t('profile.actions.update') }}</button>
                 </dd>
               </div>
               <SwitchGroup as="div" class="flex pt-6">
                 <SwitchLabel as="dt" class="flex-none pr-6 font-medium text-gray-900 sm:w-64" passive>
-                  Automatic timezone
+                  {{ $t('profile.languageAndDates.automaticTimezone') }}
                 </SwitchLabel>
                 <dd class="flex flex-auto items-center justify-end">
                   <Switch
@@ -171,7 +171,7 @@
   <Dialog :open="cropperOpen" @close="closeCropper">
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-        <h2 class="text-lg font-semibold mb-2">Upload and Crop Avatar</h2>
+        <h2 class="text-lg font-semibold mb-2">{{ $t('profile.avatar.uploadTitle') }}</h2>
         <input type="file" accept="image/*" @change="onFileChange" class="mb-4" />
         <div v-if="imageSrc" class="mb-4">
           <vue-cropper
@@ -183,8 +183,8 @@
           />
         </div>
         <div class="flex justify-end gap-2">
-          <button class="px-4 py-2 bg-gray-200 rounded" @click="closeCropper">Cancel</button>
-          <button class="px-4 py-2 bg-indigo-600 text-white rounded" @click="saveCroppedAvatar">Save</button>
+          <button class="px-4 py-2 bg-gray-200 rounded" @click="closeCropper">{{ $t('profile.avatar.cancel') }}</button>
+          <button class="px-4 py-2 bg-indigo-600 text-white rounded" @click="saveCroppedAvatar">{{ $t('profile.avatar.save') }}</button>
         </div>
       </div>
     </div>
@@ -197,6 +197,7 @@ import { Dialog, DialogPanel, Switch, SwitchGroup, SwitchLabel } from '@headless
 import { Bars3Icon, BellIcon, XMarkIcon, PencilIcon } from '@heroicons/vue/20/solid'
 import { UserCircleIcon, FingerPrintIcon, UsersIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AuthService from '@/services/AuthService.js'
 import VueCropper from 'vue-cropperjs';
 import 'vue-cropperjs/dist/vue-cropper.css';
@@ -205,6 +206,7 @@ import ApiServices from "@/services/ApiServices.js";
 import ChangePassword from '@/components/dashboard/profile/change_password.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const showChangePassword = ref(false)
 
 function logout() {
@@ -259,10 +261,10 @@ function updateField(key) {
 async function saveField(key) {
   if (key === "Email address") {
     if (!validateEmail(editingValue.value)) {
-      alert("Invalid email address.")
+      alert(t('profile.messages.invalidEmail'))
       return
     }
-    alert(`A verification email has been sent to ${editingValue.value}.`)
+    alert(t('profile.messages.verificationSent', { email: editingValue.value }))
   }
 
   try {
@@ -274,7 +276,7 @@ async function saveField(key) {
       [key.replace(/\s+/g, '').toLowerCase()]: editingValue.value
     })
     if (updateResponse.success) {
-      alert('Profile updated successfully!');
+      alert(t('profile.messages.updateSuccess'));
       await getUserInfo();
       if (key.replace(/\s+/g, '').toLowerCase() === "name") {
         AuthService.logout()
@@ -282,11 +284,11 @@ async function saveField(key) {
       }
 
     } else {
-      alert(`Failed to update profile. Reason: ${updateResponse.message}`);
+      alert(t('profile.messages.updateFailed', { message: updateResponse.message }));
     }
   } catch (error) {
     console.error('Error updating profile:', error);
-    alert('Error updating profile. Please try again.');
+    alert(t('profile.messages.updateError'));
   } finally {
     editingField.value = null;
     editingValue.value = '';
@@ -335,20 +337,20 @@ async function saveCroppedAvatar() {
         const avatarUpdateResponse = await ApiServices.updateUserAvatar(croppedImageData)
         if (avatarUpdateResponse.success) {
           profile.value.avatar = croppedImageData;
-          alert('Avatar updated successfully!');
+          alert(t('profile.avatar.success'));
         } else {
-          alert('Failed to update avatar. Please try again.')
+          alert(t('profile.avatar.failed'))
         }
         closeCropper();
       } catch (error) {
         console.error('Error saving cropped avatar:', error);
-        alert('Error saving avatar. Please try again.');
+        alert(t('profile.avatar.failed'));
       }
     } else {
-      alert('No cropped image available.');
+      alert(t('profile.avatar.noCropped'));
     }
   } else {
-    alert('Cropper instance is not available.');
+    alert(t('profile.avatar.noCropper'));
   }
 }
 
@@ -358,7 +360,7 @@ const editingLanguage = ref(false)
 
 function toggleLanguageEdit() {
   if (editingLanguage.value) {
-    alert(`Language updated to ${currentLanguage.value}`)
+    alert(t('profile.messages.languageUpdated', { language: currentLanguage.value }))
     ApiServices.updateUserLanguage(currentLanguage.value)
   }
   editingLanguage.value = !editingLanguage.value

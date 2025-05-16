@@ -17,12 +17,15 @@
           borderColorClass
         ]"
       ></div>
-      <p v-if="message" class="mt-2 text-gray-600">{{ message }}</p>
+      <p v-if="displayMessage" class="mt-2 text-gray-600">{{ displayMessage }}</p>
     </div>
   </template>
   
   <script setup>
   import { computed } from 'vue';
+  import { useI18n } from 'vue-i18n';
+  
+  const { t } = useI18n();
   
   const props = defineProps({
     size: {
@@ -35,8 +38,12 @@
     },
     message: {
       type: String,
-      default: '加载中...'
+      default: ''
     }
+  });
+  
+  const displayMessage = computed(() => {
+    return t('components.loadingSpinner.loading') || props.message;
   });
   
   const borderColorClass = computed(() => {

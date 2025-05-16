@@ -11,8 +11,8 @@
 <template>
   <div>
     <div class="mb-5">
-      <h1 class="text-2xl font-semibold text-gray-900">机器人状态列表</h1>
-      <p class="mt-1 text-sm text-gray-500">点击查看机器人详细信息</p>
+      <h1 class="text-2xl font-semibold text-gray-900">{{ $t('home.welcome') }}</h1>
+      <p class="mt-1 text-sm text-gray-500">{{ $t('home.usage') }}</p>
     </div>
     <LoadingSpinner v-if="loading" message="加载中..." />
     <div v-else>
@@ -41,7 +41,7 @@
           </div>
           <dl class="-my-3 divide-y divide-gray-100 px-6 py-4 text-sm/6">
             <div class="flex justify-between gap-x-4 py-3">
-              <dt class="text-gray-500">电量</dt>
+              <dt class="text-gray-500">{{ $t('home.electricity') }}</dt>
               <dd class="text-gray-700 flex items-center">
                 <div class="w-16 bg-gray-200 rounded-full h-1.5 mr-2 dark:bg-gray-700">
                   <div 
@@ -51,22 +51,22 @@
                   ></div>
                 </div>
                 {{ robot.status.power }}%
-                <div v-if="robot.status.isCharging" class="ml-2 text-xs text-gray-500">充电中</div>
+                <div v-if="robot.status.isCharging" class="ml-2 text-xs text-gray-500">{{ $t('home.inCharge') }}</div>
               </dd>
             </div>
             <div class="flex justify-between gap-x-4 py-3">
-              <dt class="text-gray-500">任务状态</dt>
+              <dt class="text-gray-500">{{ $t('home.taskStatus') }}</dt>
               <dd class="flex items-start gap-x-2">
                 <div class="font-medium text-gray-900">{{ robot.status.message }}</div>
                 <div :class="[statuses[robot.status.status], 'rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset']">{{ robot.status.status }}</div>
               </dd>
             </div>
             <div class="flex justify-between gap-x-4 py-3">
-              <dt class="text-gray-500">位置</dt>
+              <dt class="text-gray-500">{{ $t('home.location') }}</dt>
               <dd class="text-gray-700">{{ robot.status.location }}</dd>
             </div>
             <div class="flex justify-between gap-x-4 py-3">
-              <dt class="text-gray-500">货仓ID</dt>
+              <dt class="text-gray-500">{{ $t('home.warehouseID') }}</dt>
               <dd class="text-gray-700">{{ robot.cabinId }}</dd>
             </div>
           </dl>
@@ -97,12 +97,15 @@
 
 <script setup>
 import { TransitionGroup } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import ApiServices from '@/services/ApiServices'
 import NotificationService from '@/services/NotificationService'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import RobotDetail from '@/components/dashboard/RobotDetail.vue'
+
+const { t } = useI18n()
 
 // 状态样式映射
 const statuses = {

@@ -23,7 +23,7 @@
               <TransitionChild as="template" enter="ease-in-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in-out duration-300" leave-from="opacity-100" leave-to="opacity-0">
                 <div class="absolute top-0 left-full flex w-16 justify-center pt-5">
                   <button type="button" class="-m-2.5 p-2.5" @click="sidebarOpen = false">
-                    <span class="sr-only">Close sidebar</span>
+                    <span class="sr-only">{{ $t('common.close') }}</span>
                     <XMarkIcon class="size-6 text-white" aria-hidden="true" />
                   </button>
                 </div>
@@ -44,7 +44,7 @@
                             @click.prevent="setActiveView(item); sidebarOpen = false"
                           >
                             <component :is="item.icon" :class="[item.current ? 'text-white' : 'text-indigo-200 group-hover:text-white', 'size-6 shrink-0']" aria-hidden="true" />
-                            {{ item.name }}
+                            {{ $t(item.nameKey) }}
                           </a>
                         </li>
                       </ul>
@@ -78,7 +78,7 @@
                     @click.prevent="setActiveView(item)"
                   >
                     <component :is="item.icon" :class="[item.current ? 'text-white' : 'text-indigo-200 group-hover:text-white', 'size-6 shrink-0']" aria-hidden="true" />
-                    {{ item.name }}
+                    {{ $t(item.nameKey) }}
                   </a>
                 </li>
               </ul>
@@ -90,7 +90,7 @@
                   @click.prevent="setActiveView({ componentName: 'Profile' })"
               >
                 <Cog6ToothIcon class="size-6 shrink-0 text-indigo-200 group-hover:text-white" aria-hidden="true" />
-                Settings
+                {{ $t('nav.settings') }}
               </a>
             </li>
           </ul>
@@ -105,7 +105,7 @@
     >
       <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-xs sm:gap-x-6 sm:px-6 lg:px-8">
         <button type="button" class="-m-2.5 p-2.5 text-gray-700 lg:hidden" @click="sidebarOpen = true">
-          <span class="sr-only">Open sidebar</span>
+          <span class="sr-only">{{ $t('common.openSidebar') }}</span>
           <Bars3Icon class="size-6" aria-hidden="true" />
         </button>
 
@@ -114,11 +114,12 @@
 
         <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
           <div class="grid flex-1 grid-cols-1 items-center">
-<!--            <h1 class="text-lg/6 font-semibold text-gray-900">Dashboard</h1>-->
+            <!-- <h1 class="text-lg/6 font-semibold text-gray-900">Dashboard</h1> -->
           </div>
           <div class="flex items-center gap-x-4 lg:gap-x-6">
+            <LanguageSwitcher />
             <button type="button" class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
-              <span class="sr-only">View notifications</span>
+              <span class="sr-only">{{ $t('common.viewNotifications') }}</span>
               <BellIcon class="size-6" aria-hidden="true" />
             </button>
 
@@ -128,7 +129,7 @@
             <!-- Profile dropdown -->
             <Menu as="div" class="relative">
               <MenuButton class="-m-1.5 flex items-center p-1.5">
-                <span class="sr-only">Open user menu</span>
+                <span class="sr-only">{{ $t('common.openUserMenu') }}</span>
                 <img class="size-8 rounded-full bg-gray-50" :src="useravatar" alt="" />
                 <span class="hidden lg:flex lg:items-center">
                   <span class="ml-4 text-sm/6 font-semibold text-gray-900" aria-hidden="true"> {{ username }} </span>
@@ -143,7 +144,7 @@
                       :class="[active ? 'bg-gray-50 outline-hidden' : '', 'block px-3 py-1 text-sm/6 text-gray-900']"
                       @click="item.action ? item.action() : setActiveView(item)"
                     >
-                      {{ item.name }}
+                      {{ $t(item.nameKey) }}
                     </a>
                   </MenuItem>
 
@@ -158,7 +159,7 @@
 
       <main class="py-10">
         <div class="px-4 sm:px-6 lg:px-8">
-          <LoadingSpinner v-if="loading" message="加载中..." />
+          <LoadingSpinner v-if="loading" :message="$t('common.loading')" />
           <Suspense v-else>
             <template #default>
               <component
@@ -168,7 +169,7 @@
               />
             </template>
             <template #fallback>
-              <LoadingSpinner message="正在渲染组件..." color="indigo" />
+              <LoadingSpinner :message="$t('common.renderingComponent')" color="indigo" />
             </template>
           </Suspense>
         </div>
@@ -180,8 +181,10 @@
 <script setup>
 import { ref, shallowRef, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AuthService from '@/services/AuthService'
 import ApiServices from '@/services/ApiServices'
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 
 import {
   Dialog,
@@ -205,6 +208,7 @@ import {
 import { ChevronDownIcon } from '@heroicons/vue/20/solid'
 
 const router = useRouter()
+const { t } = useI18n()
 const sidebarOpen = ref(false)
 const isLargeScreen = ref(window.innerWidth >= 1024)
 const loading = ref(true)
@@ -221,14 +225,14 @@ function logout() {
 }
 
 const navigation = [
-  { name: '主页', href: '#', icon: HomeIcon, current: true, componentName: 'Overview'  },
-  { name: '发布任务', href: '#', icon: DocumentArrowUpIcon, current: false, componentName: 'TaskPublish'  },
-  { name: '任务看板', href: '#', icon: ChartBarSquareIcon, current: false, componentName: 'TaskBoard'  },
-  { name: '开发团队', href: '#', icon: ChartBarSquareIcon, current: false, componentName: 'Team'  },
+  { name: '主页', nameKey: 'nav.home', href: '#', icon: HomeIcon, current: true, componentName: 'Overview'  },
+  { name: '发布任务', nameKey: 'nav.publish', href: '#', icon: DocumentArrowUpIcon, current: false, componentName: 'TaskPublish'  },
+  { name: '任务看板', nameKey: 'nav.tasks', href: '#', icon: ChartBarSquareIcon, current: false, componentName: 'TaskBoard'  },
+  { name: '开发团队', nameKey: 'nav.team', href: '#', icon: ChartBarSquareIcon, current: false, componentName: 'Team'  },
 ]
 const userNavigation = [
-  { name: '个人资料', href: '#', componentName: 'Profile' },
-  { name: '退出登录', href: '#', action: logout },
+  { name: '个人资料', nameKey: 'nav.profile', href: '#', componentName: 'Profile' },
+  { name: '退出登录', nameKey: 'common.logout', href: '#', action: logout },
 ]
 
 const componentMap = {
@@ -290,7 +294,10 @@ function handleResize() {
 // 在组件挂载时添加事件监听器
 onMounted(async () => {
   username.value = AuthService.getUsername()
+  
+  // 这里可以保持使用统一的 ApiServices 接口
   useravatar.value = await ApiServices.getUserAvatar()
+  
   window.addEventListener('resize', handleResize)
   await setActiveView(navigation[0])
 })

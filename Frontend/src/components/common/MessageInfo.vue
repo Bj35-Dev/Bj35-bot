@@ -25,7 +25,7 @@
               </div>
               <div class="ml-4 flex shrink-0">
                 <button type="button" @click="notificationService.close" class="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden">
-                  <span class="sr-only">Close</span>
+                  <span class="sr-only">{{ $t('components.messageInfo.close') }}</span>
                   <XMarkIcon class="size-5" aria-hidden="true" />
                 </button>
               </div>
