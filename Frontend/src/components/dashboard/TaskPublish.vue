@@ -293,7 +293,9 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { TransitionGroup } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
-import ApiServices from '@/services/ApiServices'
+import UserService from '@/services/UserService'
+import DeviceService from '@/services/DeviceService'
+import TaskService from '@/services/TaskService'
 import NotificationService from '@/services/NotificationService'
 
 import {
@@ -332,7 +334,7 @@ const targetOptions = ref([])
 
 const fetchTargets = async () => {
   try {
-    const data = await ApiServices.getTargetlist()
+    const data = await TaskService.getTargetlist()
     // 假设 data 是数组格式
     targetOptions.value = data
     // 可选：打印结果确认赋值
@@ -455,7 +457,7 @@ async function publishTask() {
         }
 
         try {
-          await ApiServices.sendMessage(node.params.message, node.params.user)
+          await UserService.sendMessage(node.params.message, node.params.user)
           NotificationService.notify(`消息已发送给 ${node.params.user}`, 'success')
         } catch (error) {
           NotificationService.notify(`发送消息失败: ${error.message}`, 'error')
@@ -479,20 +481,10 @@ async function publishTask() {
     // 如果有移动任务，调用RUN API
     if (locations.length > 0) {
       NotificationService.notify('任务已发布！', 'info');
-      const response = await ApiServices.post(`/run-task/${selectedRobot.value.id}`, {
-        locations: locations
-      })
+      const response = await DeviceService.runRobotTask(selectedRobot.value.id, locations);
 
-      if (!response) {
-        throw new Error('API响应为空')
-      }
-
-      if (response.code === 0) {
-        NotificationService.notify('任务已执行成功', 'success')
-        return response.data
-      } else {
-        throw new Error(response.message || '未知错误')
-      }
+      NotificationService.notify('任务已执行成功', 'success')
+      return response;
     }
 
     NotificationService.notify('所有任务已处理完成', 'info')
@@ -508,8 +500,8 @@ async function fetchRobots() {
   try {
     loading.value = true
 
-    // 调用API获取机器人列表
-    const response = await ApiServices.get('/robot_list')
+    // 调用DeviceService获取机器人列表
+    const response = await DeviceService.getRobotList();
 
     if (response.code === 0) {
       // 格式化数据以匹配前端结构

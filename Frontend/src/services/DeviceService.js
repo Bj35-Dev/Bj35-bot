@@ -46,6 +46,24 @@ class DeviceService extends ApiPrefix {
       throw error;
     }
   }
+  
+  // 添加运行任务的方法
+  async runRobotTask(robotId, locations) {
+    try {
+      const response = await this.post(`/run-task/${robotId}`, {
+        locations: locations
+      });
+      
+      if (response.code !== 0) {
+        throw new Error(response.message || '任务执行失败');
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('执行机器人任务失败:', error);
+      throw error;
+    }
+  }
 }
 
 export default new DeviceService();
