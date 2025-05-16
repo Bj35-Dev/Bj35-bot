@@ -2,23 +2,23 @@
   <div class="task-publish-container">
     <!-- 页面标题 -->
     <div class="mb-5">
-      <h1 class="text-2xl font-semibold text-gray-900">发布新任务</h1>
-      <p class="mt-1 text-sm text-gray-500">创建机器人任务序列并发送执行</p>
+      <h1 class="text-2xl font-semibold text-gray-900">{{ $t('tasks.publish') }}</h1>
+      <p class="mt-1 text-sm text-gray-500">{{ $t('tasks.publishDescription') }}</p>
     </div>
 
     <!-- 机器人选择与状态部分 -->
     <div class="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-3">
       <!-- 机器人选择 -->
       <div class="p-5 bg-white rounded-lg shadow">
-        <h2 class="mb-4 text-lg font-medium text-gray-900">选择机器人</h2>
+        <h2 class="mb-4 text-lg font-medium text-gray-900">{{ $t('tasks.form.selectRobot') }}</h2>
 
         <div v-if="loading" class="flex items-center justify-center py-4">
           <div class="w-5 h-5 border-2 border-t-transparent border-gray-500 rounded-full animate-spin"></div>
-          <span class="ml-2 text-gray-500">加载机器人列表...</span>
+          <span class="ml-2 text-gray-500">{{ $t('robot.loading') }}</span>
         </div>
 
         <div v-else-if="!robots.length" class="py-4 text-center text-gray-500">
-          没有可用的机器人
+          {{ $t('robot.noAvailableRobots') }}
         </div>
 
         <div v-else class="space-y-2">
@@ -37,7 +37,7 @@
               <p class="text-xs text-gray-500">ID: {{ robot.id.substring(0, 8) }}...</p>
             </div>
             <div class="ml-auto text-xs px-2 py-1 rounded" :class="getStatusClass(robot.status.status)">
-              {{ robot.status.status }}
+              {{ $t(`robot.status.${robot.status.status}`) }}
             </div>
           </div>
         </div>
@@ -45,20 +45,20 @@
 
       <!-- 机器人状态 -->
       <div class="p-5 bg-white rounded-lg shadow lg:col-span-2">
-        <h2 class="mb-4 text-lg font-medium text-gray-900">机器人状态</h2>
+        <h2 class="mb-4 text-lg font-medium text-gray-900">{{ $t('robot.statusTitle') }}</h2>
 
         <div v-if="!selectedRobot" class="py-8 text-center text-gray-500">
-          请先选择一个机器人
+          {{ $t('robot.pleaseSelectRobot') }}
         </div>
 
         <div v-else class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="p-3 bg-gray-50 rounded-md">
-              <p class="text-xs text-gray-500">当前位置</p>
-              <p class="mt-1 text-sm font-medium">{{ selectedRobot.status.location || '未知' }}</p>
+              <p class="text-xs text-gray-500">{{ $t('robot.info.location') }}</p>
+              <p class="mt-1 text-sm font-medium">{{ selectedRobot.status.location || $t('common.unknown') }}</p>
             </div>
             <div class="p-3 bg-gray-50 rounded-md">
-              <p class="text-xs text-gray-500">电池电量</p>
+              <p class="text-xs text-gray-500">{{ $t('robot.info.battery') }}</p>
               <div class="mt-1 flex items-center">
                 <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
@@ -75,7 +75,7 @@
           <div class="flex items-center">
             <span class="px-2 py-1 text-xs rounded"
                   :class="getStatusClass(selectedRobot.status.status)">
-              {{ selectedRobot.status.status }}
+              {{ $t(`robot.status.${selectedRobot.status.status}`) }}
             </span>
             <span class="ml-2 text-sm text-gray-500">{{ selectedRobot.status.message }}</span>
           </div>
@@ -86,13 +86,13 @@
     <!-- 任务创建部分 -->
     <div class="p-5 bg-white rounded-lg shadow mb-6">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium text-gray-900">创建任务流</h2>
+        <h2 class="text-lg font-medium text-gray-900">{{ $t('tasks.form.taskFlow') }}</h2>
         <div>
           <button
             class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             @click="addTaskNode"
           >
-            添加任务节点
+            {{ $t('tasks.form.addNode') }}
           </button>
         </div>
       </div>
@@ -100,7 +100,7 @@
       <!-- 任务流构建区域 -->
       <div class="mt-6 mb-4">
         <div v-if="!taskNodes.length" class="py-8 text-center text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
-          尚未添加任务节点，点击"添加任务节点"按钮开始创建任务流
+          {{ $t('tasks.form.noNodesYet') }}
         </div>
 
         <TransitionGroup
@@ -126,16 +126,16 @@
                   @change="updateNodeParams(node)"
                   class="block w-36 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                  <option value="move">前往教室</option>
-                  <option value="back">返回充电桩</option>
-                  <option value="send">发送信息</option>
+                  <option value="move">{{ $t('tasks.form.move') }}</option>
+                  <option value="back">{{ $t('tasks.form.back') }}</option>
+                  <option value="send">{{ $t('tasks.form.send') }}</option>
                 </select>
 
                 <button
                   @click="removeTaskNode(index)"
                   class="ml-3 text-red-600 hover:text-red-800"
                 >
-                  <span class="sr-only">删除</span>
+                  <span class="sr-only">{{ $t('common.delete') }}</span>
                   <TrashIcon class="size-6" aria-hidden="true" />
                 </button>
 
@@ -145,7 +145,7 @@
                     @click="moveNodeUp(index)"
                     class="text-gray-500 hover:text-gray-700"
                   >
-                    <span class="sr-only">上移</span>
+                    <span class="sr-only">{{ $t('common.moveUp') }}</span>
                     <ArrowUpIcon class="size-6" aria-hidden="true" />
                   </button>
                   <button
@@ -153,7 +153,7 @@
                     @click="moveNodeDown(index)"
                     class="ml-2 text-gray-500 hover:text-gray-700"
                   >
-                    <span class="sr-only">下移</span>
+                    <span class="sr-only">{{ $t('common.moveDown') }}</span>
                     <ArrowDownIcon class="size-6" aria-hidden="true" />
                   </button>
                 </div>
@@ -164,12 +164,12 @@
                 <!-- move 命令：两个带搜索的下拉框(target, user) 和 一个输入框(message) -->
                 <div v-if="node.type === 'move'" class="grid grid-cols-3 gap-3">
                   <div>
-                    <label class="block text-xs text-gray-500">目标</label>
+                    <label class="block text-xs text-gray-500">{{ $t('tasks.form.target') }}</label>
                     <input
                       v-model="node.params.target"
                       :list="`move-target-options-${node.id}`"
                       type="text"
-                      placeholder="搜索目标"
+                      placeholder="{{ $t('tasks.form.searchTarget') }}"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     />
                     <datalist :id="`move-target-options-${node.id}`">
@@ -184,12 +184,12 @@
 
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500">用户</label>
+                    <label class="block text-xs text-gray-500">{{ $t('tasks.form.user') }}</label>
                     <input
                       v-model="node.params.user"
                       :list="`move-user-options-${node.id}`"
                       type="text"
-                      placeholder="搜索用户"
+                      placeholder="{{ $t('tasks.form.searchUser') }}"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     />
                     <datalist :id="`move-user-options-${node.id}`">
@@ -203,11 +203,11 @@
                     </datalist>
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500">消息</label>
+                    <label class="block text-xs text-gray-500">{{ $t('tasks.form.message') }}</label>
                     <input
                       v-model="node.params.message"
                       type="text"
-                      placeholder="输入消息"
+                      placeholder="{{ $t('tasks.form.enterMessage') }}"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
@@ -216,12 +216,12 @@
                 <!-- back 命令：下拉框选择充电桩 -->
                 <div v-else-if="node.type === 'back'" class="grid grid-cols-1 gap-3">
                   <div>
-                    <label class="block text-xs text-gray-500">充电桩</label>
+                    <label class="block text-xs text-gray-500">{{ $t('tasks.form.chargePoint') }}</label>
                     <select
                       v-model="node.params.charge_point"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     >
-                      <option value="" disabled>选择充电桩</option>
+                      <option value="" disabled>{{ $t('tasks.form.selectChargePoint') }}</option>
                       <option value="3F">3F</option>
                       <option value="1F">1F</option>
                     </select>
@@ -231,12 +231,12 @@
                 <!-- send 命令：带搜索下拉框(user) 和 输入框(message) -->
                 <div v-else-if="node.type === 'send'" class="grid grid-cols-2 gap-3">
                   <div>
-                    <label class="block text-xs text-gray-500">用户</label>
+                    <label class="block text-xs text-gray-500">{{ $t('tasks.form.user') }}</label>
                     <input
                       v-model="node.params.user"
                       :list="`send-user-options-${node.id}`"
                       type="text"
-                      placeholder="搜索用户"
+                      placeholder="{{ $t('tasks.form.searchUser') }}"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     />
                     <datalist :id="`send-user-options-${node.id}`">
@@ -250,11 +250,11 @@
                     </datalist>
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500">消息</label>
+                    <label class="block text-xs text-gray-500">{{ $t('tasks.form.message') }}</label>
                     <input
                       v-model="node.params.message"
                       type="text"
-                      placeholder="输入消息"
+                      placeholder="{{ $t('tasks.form.enterMessage') }}"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
@@ -262,7 +262,7 @@
 
                 <!-- 如果需要扩展其他任务类型，可在此添加 -->
                 <div v-else class="mt-2">
-                  <p class="text-sm text-gray-600">请配置任务参数</p>
+                  <p class="text-sm text-gray-600">{{ $t('tasks.form.configureParams') }}</p>
                 </div>
               </div>
             </div>
@@ -276,13 +276,13 @@
           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           @click="resetTaskNodes"
         >
-          重置
+          {{ $t('common.reset') }}
         </button>
         <button
           class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           @click="publishTask"
         >
-          发布任务
+          {{ $t('tasks.form.publish') }}
         </button>
       </div>
     </div>
@@ -293,6 +293,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { TransitionGroup } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
+import { useI18n } from 'vue-i18n'
 import UserService from '@/services/UserService'
 import DeviceService from '@/services/DeviceService'
 import TaskService from '@/services/TaskService'
@@ -303,6 +304,8 @@ import {
   ArrowDownIcon,
   TrashIcon
 } from '@heroicons/vue/20/solid'
+
+const { t } = useI18n()
 
 // 定义组件的 props
 const props = defineProps({
@@ -531,7 +534,7 @@ async function fetchRobots() {
 
 // 提示方法
 function showNotification(message, type) {
-  NotificationService.notify(message, type)
+  NotificationService.notify(t(message), type)
 }
 
 // 组件挂载时获取机器人列表

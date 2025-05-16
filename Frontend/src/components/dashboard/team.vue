@@ -4,15 +4,15 @@
       <div class="flex flex-col">
         <!-- 页面标题 -->
         <div class="text-center mb-6">
-          <h1 class="text-3xl font-medium title-font mb-4 text-gray-900">About us</h1>
+          <h1 class="text-3xl font-medium title-font mb-4 text-gray-900">{{ $t('team.title') }}</h1>
           <p class="lg:w-2/3 mx-auto leading-relaxed text-base">
-            We’re a team of innovators and problem-solvers, blending design sensibility with functional precision. From Brooklyn-inspired aesthetics to minimalist details, we value craftsmanship without the pretension.
+            {{ $t('team.description') }}
           </p>
         </div>
         
         <!-- 技术栈滚动展示 -->
         <div class="mb-12">
-          <h2 class="text-xl font-medium title-font mb-1 text-center text-gray-900">Tech Stack</h2>
+          <h2 class="text-xl font-medium title-font mb-1 text-center text-gray-900">{{ $t('team.techStack') }}</h2>
           <div class="tech-stack">
             <div v-for="(row, index) in tagRows" :key="index" class="scroller-group">
               <div class="scroller"
@@ -87,10 +87,10 @@
               <svg class="w-16 h-16 text-blue-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
               </svg>
-              <h2 class="text-xl text-gray-900 font-medium title-font mb-2">加入我们</h2>
-              <p class="text-gray-600 text-center mb-4">我们一直在寻找优秀的开发者加入团队</p>
+              <h2 class="text-xl text-gray-900 font-medium title-font mb-2">{{ $t('team.joinUs') }}</h2>
+              <p class="text-gray-600 text-center mb-4">{{ $t('team.joinDescription') }}</p>
               <a href="mailto:join@example.com" class="inline-flex text-white bg-blue-500 border-0 py-2 px-6 focus:outline-none hover:bg-blue-600 rounded-full text-sm transition-colors duration-300">
-                联系我们
+                {{ $t('team.contactUs') }}
               </a>
             </div>
           </div>
@@ -98,109 +98,108 @@
           <!-- 额外的项目统计卡片 -->
           <div class="p-4 lg:w-1/2 md:w-1/2 w-full">
             <div class="team-card stats-card bg-white rounded-lg p-6 h-full flex flex-col">
-              <h3 class="text-lg font-medium text-gray-900 mb-4">项目统计</h3>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $t('team.projectStats') }}</h3>
               <div class="flex flex-wrap mb-2">
                 <div class="w-1/2 mb-4">
                   <div class="text-3xl font-semibold text-blue-600">15+</div>
-                  <div class="text-sm text-gray-500">完成项目</div>
+                  <div class="text-sm text-gray-500">{{ $t('team.completedProjects') }}</div>
                 </div>
                 <div class="w-1/2 mb-4">
                   <div class="text-3xl font-semibold text-indigo-600">200k+</div>
-                  <div class="text-sm text-gray-500">代码行数</div>
+                  <div class="text-sm text-gray-500">{{ $t('team.codeLines') }}</div>
                 </div>
                 <div class="w-1/2">
-                  <div class="text-3xl font-semibold text-purple-600">1+</div>
-                  <div class="text-sm text-gray-500">年团队经验</div>
+                  <div class="text-3xl font-semibold text-purple-600">3+</div>
+                  <div class="text-sm text-gray-500">{{ $t('team.teamExperience') }}</div>
                 </div>
                 <div class="w-1/2">
                   <div class="text-3xl font-semibold text-green-600">24/7</div>
-                  <div class="text-sm text-gray-500">技术支持</div>
+                  <div class="text-sm text-gray-500">{{ $t('team.support') }}</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
       </div>
     </div>
   </section>
 </template>
 
-<script>
-export default {
-  name: 'TeamSection',
-  data() {
-    return {
-      tagRows: [
-        {
-          tags: ['Vue.js', 'Vite', 'HTML', 'CSS', 'CORS', 'Tailwind', 'RESTFUL API', 'yarn', 'i18n'],
-          direction: 'left',
-          duration: 20,
-          colors: {
-            background: '#f0fdf4',
-            text: '#166534'
-          }
-        },
-        {
-          tags: ['JavaScript', 'Python', 'Quart', 'JWT', 'async', 'pydantic', 'asncpg', 'oauth2', 'Wecom'],
-          direction: 'right',
-          duration: 15,
-          colors: {
-            background: '#eff6ff',
-            text: '#1e40af'
-          }
-        },
-        {
-          tags: ['Docker', 'Compose', 'Jenkins', 'Nginx', 'Jumpserver', 'golocproxy', 'PostgreSQL'],
-          direction: 'left',
-          duration: 22,
-          colors: {
-            background: '#fdf4ff',
-            text: '#86198f'
-          }
-        }
-      ],
-      team: [
-          {
-            name: 'Yuhan Bian',
-            position: 'Full-Stack Developer',
-            description: '当你不知道做什么的时候，就重构吧',
-            image: 'https://weavatar.com/avatar/f42f9f288e5ba41aef369b4edd3c5f5c?d=retro&s=512',
-            github: 'https://github.com/AptS-1547',
-            telegram: 'https://t.me/AptS1547',
-            website: 'https://www.esaps.net'
-          },
-          {
-            name: 'Zhicheng Dong',
-            position: 'Full-Stack Developer',
-            description: 'Nothing is impossible with Docker.！',
-            image: 'https://cn.cravatar.com/avatar/4ca6db8f5673f5f001c5901fc04b2322ff304b13c9b805576ddf47e310a481dc?s=512',
-            github: 'https://github.com/cg8-5712',
-            telegram: 'http://cg85712.t.me',
-            website: 'mailto:5712.cg8@gmail.com'
-          },
-          {
-            name: 'Yuhe Cheng',
-            position: 'Backend Developer',
-            description: '前OI选手, 技术栈：python、C/C++, 擅长后端代码开发工作，但被强迫转型运维',
-            image: 'https://avatars.githubusercontent.com/u/112048581',
-            github: 'https://github.com/0515wlx',
-            telegram: 'mailto:chengyuhe519@163.com',
-            website: 'mailto:chengyuhe519@163.com'
-          },
-          {
-            name: 'Lixuan Wei',
-            position: 'Backend Developer',
-            description: 'HPCer深度学习研究员，AI agent开发者。技术栈：python、C、cuda、C++擅长开发进程中的人文问题，提高资源利用率',
-            image: 'https://avatars.githubusercontent.com/u/162896209',
-            github: 'https://github.com/0515wlx',
-            telegram: 'mailto:wlx20082022@163.com',
-            website: 'mailto:wlx20082022@163.com'
-          }
-      ]
+<script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+// 定义团队数据
+const team = [
+  {
+    name: 'Yuhan Bian',
+    position: 'Full-Stack Developer',
+    description: '当你不知道做什么的时候，就重构吧',
+    image: 'https://cn.cravatar.com/avatar/f42f9f288e5ba41aef369b4edd3c5f5c?d=retro&s=512',
+    github: 'https://github.com/AptS-1547',
+    telegram: 'https://t.me/AptS1547',
+    website: 'https://www.esaps.net'
+  },
+  {
+    name: 'Zhicheng Dong',
+    position: 'Full-Stack Developer',
+    description: 'Nothing is impossible with Docker.！',
+    image: 'https://cn.cravatar.com/avatar/4ca6db8f5673f5f001c5901fc04b2322ff304b13c9b805576ddf47e310a481dc?s=512',
+    github: 'https://github.com/cg8-5712',
+    telegram: 'http://cg85712.t.me',
+    website: 'mailto:5712.cg8@gmail.com'
+  },
+  {
+    name: 'Yuhe Cheng',
+    position: 'Backend Developer',
+    description: '前OI选手, 技术栈：python、C/C++, 擅长后端代码开发工作，但被强迫转型运维',
+    image: 'https://avatars.githubusercontent.com/u/112048581',
+    github: 'https://github.com/0515wlx',
+    telegram: 'mailto:chengyuhe519@163.com',
+    website: 'mailto:chengyuhe519@163.com'
+  },
+  {
+    name: 'Lixuan Wei',
+    position: 'Backend Developer',
+    description: 'HPCer深度学习研究员，AI agent开发者。技术栈：python、C、cuda、C++擅长开发进程中的人文问题，提高资源利用率',
+    image: 'https://avatars.githubusercontent.com/u/162896209',
+    github: 'https://github.com/0515wlx',
+    telegram: 'mailto:wlx20082022@163.com',
+    website: 'mailto:wlx20082022@163.com'
+  }
+]
+
+// 定义技术栈数据
+const tagRows = [
+  {
+    tags: ['Vue.js', 'Vite', 'HTML', 'CSS', 'CORS', 'Tailwind', 'RESTFUL API', 'yarn', 'i18n'],
+    direction: 'left',
+    duration: 20,
+    colors: {
+      background: '#f0fdf4',
+      text: '#166534'
+    }
+  },
+  {
+    tags: ['JavaScript', 'Python', 'Quart', 'JWT', 'async', 'pydantic', 'asncpg', 'oauth2', 'Wecom'],
+    direction: 'right',
+    duration: 15,
+    colors: {
+      background: '#eff6ff',
+      text: '#1e40af'
+    }
+  },
+  {
+    tags: ['Docker', 'Compose', 'Jenkins', 'Nginx', 'Jumpserver', 'golocproxy', 'PostgreSQL'],
+    direction: 'left',
+    duration: 22,
+    colors: {
+      background: '#fdf4ff',
+      text: '#86198f'
     }
   }
-}
+]
 </script>
 
 <style scoped>
