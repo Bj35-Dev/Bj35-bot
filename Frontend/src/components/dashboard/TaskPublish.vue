@@ -494,7 +494,7 @@ async function publishTask() {
     return []
   } catch (error) {
     console.error('发布任务失败:', error)
-    NotificationService.notify(t('tasks.notification.publishFailed') + `: ${error.message || t('common.unknown')}`, 'error')
+    NotificationService.notify(t('tasks.notification.publishFailed', { error: error.message || t('common.unknown') }), 'error')
   }
 }
 
