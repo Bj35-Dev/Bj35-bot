@@ -105,7 +105,8 @@ export default {
       offline: 'Offline',
       idle: 'Idle',
       busy: 'Busy',
-      error: 'Error'
+      error: 'Error',
+      unknown: 'Unknown'
     },
     info: {
       location: 'Current Location',
@@ -116,16 +117,6 @@ export default {
     noAvailableRobots: 'No available robots',
     pleaseSelectRobot: 'Please select a robot first',
     statusTitle: 'Robot Status',
-    status: {
-      '空闲': 'Idle',
-      '执行任务中': 'Busy',
-      '未知': 'Unknown',
-      '错误': 'Error',
-      idle: 'Idle',
-      busy: 'Busy',
-      error: 'Error',
-      unknown: 'Unknown'
-    },
     detail: {
       onlineStatus: 'Online Status',
       online: 'Online',
