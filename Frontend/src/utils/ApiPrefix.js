@@ -1,5 +1,5 @@
 import axios from 'axios';
-import AuthService from './AuthService';
+import AuthService from '../services/AuthService';
 
 class ApiPrefix {
   constructor() {
@@ -82,33 +82,11 @@ class ApiPrefix {
   // 错误处理
   _handleError(error) {
     console.error('API请求错误:', error);
-    if (error.response.status === 401) {
+    if (error.response && error.response.status === 401) {
       AuthService.logout();
       window.location.href = '/login';
     }
   }
 }
 
-import UserService from './UserService';
-import DeviceService from './DeviceService';
-import TaskService from './TaskService';
-
-// 为了保持兼容性，我们可以导出一个统一的 API 服务对象
-export default {
-  // 用户相关服务
-  getUserInfo: UserService.getUserInfo.bind(UserService),
-  getUserAvatar: UserService.getUserAvatar.bind(UserService),
-  updateUserProfile: UserService.updateUserProfile.bind(UserService),
-  updateUserAvatar: UserService.updateUserAvatar.bind(UserService),
-  changeUserPassword: UserService.changeUserPassword.bind(UserService),
-  sendMessage: UserService.sendMessage.bind(UserService),
-  
-  // 设备相关服务
-  getRobotList: DeviceService.getRobotList.bind(DeviceService),
-  getDeviceById: DeviceService.getDeviceById.bind(DeviceService),
-  getDeviceName: DeviceService.getDeviceName.bind(DeviceService),
-  
-  // 任务相关服务
-  getTasklist: TaskService.getTasklist.bind(TaskService),
-  getTargetlist: TaskService.getTargetlist.bind(TaskService)
-};
+export default ApiPrefix;
