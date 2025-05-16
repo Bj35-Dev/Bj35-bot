@@ -80,21 +80,7 @@
               </div>
             </div>
           </div>
-          
-          <!-- 加入我们卡片 -->
-          <div class="p-4 lg:w-1/2 md:w-1/2 w-full">
-            <div class="team-card join-card bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 flex flex-col justify-center items-center h-full">
-              <svg class="w-16 h-16 text-blue-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-              </svg>
-              <h2 class="text-xl text-gray-900 font-medium title-font mb-2">{{ $t('team.joinUs') }}</h2>
-              <p class="text-gray-600 text-center mb-4">{{ $t('team.joinDescription') }}</p>
-              <a href="mailto:join@example.com" class="inline-flex text-white bg-blue-500 border-0 py-2 px-6 focus:outline-none hover:bg-blue-600 rounded-full text-sm transition-colors duration-300">
-                {{ $t('team.contactUs') }}
-              </a>
-            </div>
-          </div>
-          
+
           <!-- 额外的项目统计卡片 -->
           <div class="p-4 lg:w-1/2 md:w-1/2 w-full">
             <div class="team-card stats-card bg-white rounded-lg p-6 h-full flex flex-col">
@@ -119,6 +105,21 @@
               </div>
             </div>
           </div>
+
+          <!-- 加入我们卡片 -->
+          <div class="p-4 lg:w-1/2 md:w-1/2 w-full">
+            <div class="team-card join-card bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 flex flex-col justify-center items-center h-full">
+              <svg class="w-16 h-16 text-blue-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+              </svg>
+              <h2 class="text-xl text-gray-900 font-medium title-font mb-2">{{ $t('team.joinUs') }}</h2>
+              <p class="text-gray-600 text-center mb-4">{{ $t('team.joinDescription') }}</p>
+              <a href="mailto:join@example.com" class="inline-flex text-white bg-blue-500 border-0 py-2 px-6 focus:outline-none hover:bg-blue-600 rounded-full text-sm transition-colors duration-300">
+                {{ $t('team.contactUs') }}
+              </a>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -153,7 +154,7 @@ const team = [
   {
     name: 'Yuhe Cheng',
     position: 'Backend Developer',
-    description: '前OI选手, 技术栈：python、C/C++, 擅长后端代码开发工作，但被强迫转型运维',
+    description: '前OI选手, 技术栈：python、C/C++, 擅长后端代码开发工作',
     image: 'https://avatars.githubusercontent.com/u/112048581',
     github: 'https://github.com/0515wlx',
     telegram: 'mailto:chengyuhe519@163.com',
@@ -162,7 +163,7 @@ const team = [
   {
     name: 'Lixuan Wei',
     position: 'Backend Developer',
-    description: 'HPCer深度学习研究员，AI agent开发者。技术栈：python、C、cuda、C++擅长开发进程中的人文问题，提高资源利用率',
+    description: 'HPCer深度学习研究员AI agent开发者。技术栈：python、C、cuda、C++擅长提高资源利用率',
     image: 'https://avatars.githubusercontent.com/u/162896209',
     github: 'https://github.com/0515wlx',
     telegram: 'mailto:wlx20082022@163.com',
@@ -173,7 +174,10 @@ const team = [
 // 定义技术栈数据
 const tagRows = [
   {
-    tags: ['Vue.js', 'Vite', 'HTML', 'CSS', 'CORS', 'Tailwind', 'RESTFUL API', 'yarn', 'i18n'],
+    tags: [
+      'Vue.js', 'Vite', 'HTML', 'CSS', 'CORS', 'Tailwind', 'RESTFUL API', 'yarn', 'i18n',
+      'TypeScript', 'Element Plus', 'Pinia', 'Sass', 'Less', 'ESLint', 'Prettier', 'Axios'
+    ],
     direction: 'left',
     duration: 20,
     colors: {
@@ -182,7 +186,10 @@ const tagRows = [
     }
   },
   {
-    tags: ['JavaScript', 'Python', 'Quart', 'JWT', 'async', 'pydantic', 'asncpg', 'oauth2', 'Wecom'],
+    tags: [
+      'JavaScript', 'Python', 'Quart', 'JWT', 'async', 'pydantic', 'asncpg', 'oauth2', 'Wecom',
+      'FastAPI', 'Flask', 'Node.js', 'Express', 'OpenAI API', 'Redis', 'Celery', 'WebSocket'
+    ],
     direction: 'right',
     duration: 15,
     colors: {
@@ -191,7 +198,10 @@ const tagRows = [
     }
   },
   {
-    tags: ['Docker', 'Compose', 'Jenkins', 'Nginx', 'Jumpserver', 'golocproxy', 'PostgreSQL'],
+    tags: [
+      'Docker', 'Compose', 'Jenkins', 'Nginx', 'Jumpserver', 'golocproxy', 'PostgreSQL',
+      'Kubernetes', 'GitHub Actions', 'Prometheus', 'Grafana', 'Linux', 'Ansible'
+    ],
     direction: 'left',
     duration: 22,
     colors: {
