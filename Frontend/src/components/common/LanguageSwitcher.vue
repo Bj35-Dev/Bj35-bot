@@ -43,7 +43,7 @@
       <a
         href="#"
         class="block px-4 py-2 text-sm hover:bg-gray-100"
-        @click.prevent="changeLanguage('zh')"
+        @click.prevent="changeLanguage('zhcn')"
         role="menuitem"
       >
         <span class="flag-icon">🇨🇳</span>
