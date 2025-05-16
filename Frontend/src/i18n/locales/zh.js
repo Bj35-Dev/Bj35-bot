@@ -23,13 +23,14 @@ export default {
     openUserMenu: '打开用户菜单',
     unknown: '未知',
     renderingComponent: '正在渲染组件...',
-    reset: '重置'
+    reset: '重置',
+    moveUp: '上移',
+    moveDown: '下移'
   },
   
   // 导航菜单
   nav: {
     home: '首页',
-    dashboard: '仪表盘',
     tasks: '任务',
     publish: '发布任务',
     team: '团队介绍',
@@ -40,15 +41,12 @@ export default {
   // 首页
   home: {
     welcome: '欢迎使用BJ35-Bot管理系统',
-    description: '一个全面的机器人任务管理解决方案'
-  },
-  
-  // 仪表盘
-  dashboard: {
-    title: '仪表盘',
-    overview: '概览',
-    statistics: '统计信息',
-    recentActivity: '最近活动'
+    usage: '点击查看最新的机器人任务和状态',
+    electricity: '电量',
+    inCharge: '充电中',
+    taskStatus: '任务状态',
+    location: '位置',
+    warehouseID: '货仓ID',
   },
   
   // 任务相关
@@ -79,13 +77,23 @@ export default {
       selectChargePoint: '选择充电桩',
       reset: '重置',
       publish: '发布',
-      noNodesYet: '尚未添加任务节点，点击"添加任务节点"按钮开始创建任务流'
+      noNodesYet: '尚未添加任务节点，点击"添加任务节点"按钮开始创建任务流',
+      move: '移动',
+      back: '返回充电',
+      send: '发送消息',
+      configureParams: '配置参数'
     },
     notification: {
       publishSuccess: '任务发布成功',
       publishFailed: '任务发布失败',
       noRobot: '请先选择一个机器人',
-      invalidParams: '无效的任务参数'
+      invalidParams: '无效的任务参数',
+      messageSent: '消息已发送给 {user}',
+      messageFailure: '发送消息失败: {error}',
+      specifyUserMessage: '发送消息需要指定用户和消息内容',
+      taskPublished: '任务已发布！',
+      taskExecuted: '任务已执行成功',
+      allTasksComplete: '所有任务已处理完成'
     },
     publishDescription: '创建机器人任务序列并发送执行'
   },
@@ -108,7 +116,26 @@ export default {
     loading: '加载机器人列表...',
     noAvailableRobots: '没有可用的机器人',
     pleaseSelectRobot: '请先选择一个机器人',
-    statusTitle: '机器人状态'
+    statusTitle: '机器人状态',
+    detail: {
+      onlineStatus: '在线状态',
+      online: '在线',
+      offline: '离线',
+      power: '电量',
+      chargingStatus: '充电状态',
+      charging: '正在充电',
+      notCharging: '未充电',
+      cabinId: '货仓ID',
+      location: '位置',
+      unknownLocation: '未知位置',
+      lastMessage: '最近消息',
+      noMessage: '无消息',
+      lastActivity: '最近活动',
+      unknownDate: '未知',
+      invalidDate: '无效日期',
+      controlRobot: '控制机器人',
+      close: '关闭'
+    }
   },
   
   // 团队页面
@@ -144,5 +171,117 @@ export default {
     oldPassword: '旧密码',
     newPassword: '新密码',
     confirmPassword: '确认新密码'
+  },
+  
+  // 任务看板
+  taskBoard: {
+    title: '任务看板',
+    description: '点击查看详细信息',
+    loading: '加载中...',
+    rowsPerPage: '每页显示',
+    taskNo: '任务 NO',
+    createdAt: '创建时间',
+    status: '状态',
+    target: '目标',
+    pagination: {
+      showing: '显示',
+      to: '至',
+      of: '共',
+      results: '条记录',
+      previous: '上一页',
+      next: '下一页'
+    },
+    modal: {
+      title: '任务详情',
+      taskNo: '任务 NO',
+      taskId: 'Task ID',
+      outTaskId: 'Out Task ID',
+      createdAt: '创建时间',
+      updatedAt: '更新时间',
+      status: '状态',
+      taskType: '任务类型',
+      target: '目标'
+    },
+    renderingComponent: '正在渲染组件...'
+  },
+  
+  // 个人资料
+  profile: {
+    general: '通用',
+    security: '安全',
+    notifications: '通知',
+    teamMembers: '团队成员',
+    logout: '退出登录',
+    title: '个人资料',
+    personalInfo: {
+      name: '姓名',
+      emailAddress: '邮箱地址',
+      mobile: '手机',
+      department: '部门',
+      wecom: '企业微信'
+    },
+    languageAndDates: {
+      title: '语言和日期',
+      description: '选择您账户中使用的语言和日期格式。',
+      language: '语言',
+      dateFormat: '日期格式',
+      automaticTimezone: '自动时区'
+    },
+    avatar: {
+      uploadTitle: '上传并裁剪头像',
+      cancel: '取消',
+      save: '保存',
+      success: '头像更新成功！',
+      failed: '头像更新失败，请重试。',
+      noCropped: '没有可用的裁剪图像。',
+      noCropper: '裁剪工具不可用。'
+    },
+    actions: {
+      update: '更新',
+      save: '保存',
+      uploadAvatar: '上传头像'
+    },
+    messages: {
+      invalidEmail: '邮箱地址无效。',
+      verificationSent: '验证邮件已发送至 {email}。',
+      updateSuccess: '个人资料更新成功！',
+      updateFailed: '个人资料更新失败。原因：{message}',
+      updateError: '更新个人资料时出错，请重试。',
+      languageUpdated: '语言已更新为 {language}'
+    }
+  },
+
+  // 404错误页面
+  notFound: {
+    pageNotFound: '页面找不到了',
+    waitingForContent: '正在等你填充这里的空白',
+    backToHome: '回到首页'
+  },
+  
+  // 登录页面
+  login: {
+    title: '登录您的账户',
+    rememberMe: '记住我',
+    loginWithAccount: '账号密码登录',
+    loginWithWecom: '企业微信登录',
+    validatingCredentials: '验证登录凭据...',
+    wecomLoginSuccess: '企业微信登录成功',
+    invalidCredentials: '登录凭据无效或已过期',
+    validationFailed: '验证失败：',
+    loginFailed: '登录失败：',
+    loggingIn: '登录中……',
+    loginSuccess: '登录成功',
+    checkCredentials: '登录失败，请检查您的用户名和密码',
+    systemError: '系统错误：'
+  },
+  
+  // 通用组件
+  components: {
+    messageInfo: {
+      close: '关闭'
+    },
+    loadingSpinner: {
+      loading: '加载中...'
+    }
   }
 }

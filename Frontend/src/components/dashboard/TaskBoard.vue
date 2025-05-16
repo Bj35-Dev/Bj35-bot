@@ -9,20 +9,20 @@
   <div class="p-4">
     <!-- 标题与说明 -->
     <div class="mb-5">
-      <h1 class="text-2xl font-semibold text-gray-900">任务看板</h1>
-      <p class="mt-1 text-sm text-gray-500">点击查看详细信息</p>
+      <h1 class="text-2xl font-semibold text-gray-900">{{ $t('taskBoard.title') }}</h1>
+      <p class="mt-1 text-sm text-gray-500">{{ $t('taskBoard.description') }}</p>
     </div>
 
     <!-- 加载中状态 -->
     <div v-if="loading" class="flex justify-center items-center h-64">
-<!--      <div class="text-gray-500">加载中...</div>-->
+<!--      <div class="text-gray-500">{{ $t('taskBoard.loading') }}</div>-->
     </div>
 
     <!-- 数据展示 -->
     <div v-else>
       <!-- 每页展示条数选择 -->
       <div class="mb-4 flex justify-end items-center">
-        <label class="mr-2 text-sm text-gray-700">每页显示</label>
+        <label class="mr-2 text-sm text-gray-700">{{ $t('taskBoard.rowsPerPage') }}</label>
         <select v-model.number="pageSize" class="border border-gray-300 rounded-md p-1">
           <option :value="10">10</option>
           <option :value="20">20</option>
@@ -36,10 +36,10 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">任务 NO</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">创建时间</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">目标</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('taskBoard.taskNo') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('taskBoard.createdAt') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('taskBoard.status') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('taskBoard.target') }}</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -71,27 +71,27 @@
             :disabled="currentPage === 1"
             class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            Previous
+            {{ $t('taskBoard.pagination.previous') }}
           </button>
           <button
             @click="nextPage"
             :disabled="currentPage === totalPages"
             class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            Next
+            {{ $t('taskBoard.pagination.next') }}
           </button>
         </div>
         <!-- 桌面端视图 -->
         <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
-              Showing
+              {{ $t('taskBoard.pagination.showing') }}
               <span class="font-medium">{{ firstItem }}</span>
-              to
+              {{ $t('taskBoard.pagination.to') }}
               <span class="font-medium">{{ lastItem }}</span>
-              of
+              {{ $t('taskBoard.pagination.of') }}
               <span class="font-medium">{{ totalResults }}</span>
-              results
+              {{ $t('taskBoard.pagination.results') }}
             </p>
           </div>
           <div>
@@ -101,7 +101,7 @@
                 :disabled="currentPage === 1"
                 class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
               >
-                <span class="sr-only">Previous</span>
+                <span class="sr-only">{{ $t('taskBoard.pagination.previous') }}</span>
                 <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
               </button>
               <template v-for="page in pages" :key="page">
@@ -125,7 +125,7 @@
                 :disabled="currentPage === totalPages"
                 class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
               >
-                <span class="sr-only">Next</span>
+                <span class="sr-only">{{ $t('taskBoard.pagination.next') }}</span>
                 <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
               </button>
             </nav>
@@ -142,37 +142,37 @@
       >
         <div class="bg-white rounded-lg shadow-lg p-6 w-96">
           <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-gray-900">任务详情</h2>
+            <h2 class="text-xl font-semibold text-gray-900">{{ $t('taskBoard.modal.title') }}</h2>
             <button @click="closeModal" class="text-gray-500 hover:text-gray-700">&times;</button>
           </div>
           <div class="space-y-2 text-sm text-gray-800">
-            <div><span class="font-medium">任务 NO:</span> {{ selectedTask.no }}</div>
-            <div><span class="font-medium">Task ID:</span> {{ selectedTask.taskId }}</div>
-            <div><span class="font-medium">Out Task ID:</span> {{ selectedTask.outTaskId }}</div>
+            <div><span class="font-medium">{{ $t('taskBoard.modal.taskNo') }}:</span> {{ selectedTask.no }}</div>
+            <div><span class="font-medium">{{ $t('taskBoard.modal.taskId') }}:</span> {{ selectedTask.taskId }}</div>
+            <div><span class="font-medium">{{ $t('taskBoard.modal.outTaskId') }}:</span> {{ selectedTask.outTaskId }}</div>
             <div>
-              <span class="font-medium">创建时间:</span>
+              <span class="font-medium">{{ $t('taskBoard.modal.createdAt') }}:</span>
               {{ formatTime(selectedTask.createdAt) }}
             </div>
             <div>
-              <span class="font-medium">更新时间:</span>
+              <span class="font-medium">{{ $t('taskBoard.modal.updatedAt') }}:</span>
               {{ formatTime(selectedTask.updatedAt) }}
             </div>
-            <div><span class="font-medium">状态:</span> {{ selectedTask.status }}</div>
-            <div><span class="font-medium">任务类型:</span> {{ selectedTask.taskType }}</div>
-            <div><span class="font-medium">目标:</span> {{ selectedTask.target }}</div>
+            <div><span class="font-medium">{{ $t('taskBoard.modal.status') }}:</span> {{ selectedTask.status }}</div>
+            <div><span class="font-medium">{{ $t('taskBoard.modal.taskType') }}:</span> {{ selectedTask.taskType }}</div>
+            <div><span class="font-medium">{{ $t('taskBoard.modal.target') }}:</span> {{ selectedTask.target }}</div>
           </div>
         </div>
       </div>
     </transition>
     <main class="py-10">
         <div class="px-4 sm:px-6 lg:px-8">
-          <LoadingSpinner v-if="loading" message="加载中..." />
+          <LoadingSpinner v-if="loading" :message="$t('common.loading')" />
           <Suspense v-else>
             <template #default>
               <component :is="currentComponent" />
             </template>
             <template #fallback>
-              <LoadingSpinner message="正在渲染组件..." color="indigo" />
+              <LoadingSpinner :message="$t('taskBoard.renderingComponent')" color="indigo" />
             </template>
           </Suspense>
         </div>
@@ -184,6 +184,9 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import ApiServices from '@/services/ApiServices'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const statuses = {
   'SUCCESS': 'text-green-700 bg-green-50 ring-green-600/20 max-w-[70px]',

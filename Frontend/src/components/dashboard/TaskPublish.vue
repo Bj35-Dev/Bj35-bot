@@ -169,7 +169,7 @@
                       v-model="node.params.target"
                       :list="`move-target-options-${node.id}`"
                       type="text"
-                      placeholder="{{ $t('tasks.form.searchTarget') }}"
+                      :placeholder="$t('tasks.form.searchTarget')"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     />
                     <datalist :id="`move-target-options-${node.id}`">
@@ -189,7 +189,7 @@
                       v-model="node.params.user"
                       :list="`move-user-options-${node.id}`"
                       type="text"
-                      placeholder="{{ $t('tasks.form.searchUser') }}"
+                      :placeholder="$t('tasks.form.searchUser')"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     />
                     <datalist :id="`move-user-options-${node.id}`">
@@ -207,7 +207,7 @@
                     <input
                       v-model="node.params.message"
                       type="text"
-                      placeholder="{{ $t('tasks.form.enterMessage') }}"
+                      :placeholder="$t('tasks.form.enterMessage')"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
@@ -236,7 +236,7 @@
                       v-model="node.params.user"
                       :list="`send-user-options-${node.id}`"
                       type="text"
-                      placeholder="{{ $t('tasks.form.searchUser') }}"
+                      :placeholder="$t('tasks.form.searchUser')"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     />
                     <datalist :id="`send-user-options-${node.id}`">
@@ -254,7 +254,7 @@
                     <input
                       v-model="node.params.message"
                       type="text"
-                      placeholder="{{ $t('tasks.form.enterMessage') }}"
+                      :placeholder="$t('tasks.form.enterMessage')"
                       class="block w-full mt-1 px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
@@ -376,7 +376,7 @@ function selectRobot(robot) {
 function addTaskNode() {
   console.log(selectedRobot.value)
   if (!selectedRobot.value) {
-    showNotification('请先选择一个机器人', 'warning')
+    showNotification('tasks.notification.noRobot', 'warning')
     return
   }
   taskNodes.value.push({
@@ -445,7 +445,7 @@ const canPublish = computed(() => {
 // 发布任务
 async function publishTask() {
   if (!canPublish.value) {
-    NotificationService.notify('无法发布任务，请检查机器人状态和任务配置', 'error')
+    NotificationService.notify(t('tasks.notification.invalidParams'), 'error')
     return
   }
 
@@ -455,15 +455,15 @@ async function publishTask() {
       if (node.type === 'send') {
         // 发送消息节点
         if (!node.params.user || !node.params.message) {
-          NotificationService.notify('发送消息需要指定用户和消息内容', 'warning')
+          NotificationService.notify(t('tasks.notification.specifyUserMessage'), 'warning')
           continue
         }
 
         try {
           await UserService.sendMessage(node.params.message, node.params.user)
-          NotificationService.notify(`消息已发送给 ${node.params.user}`, 'success')
+          NotificationService.notify(t('tasks.notification.messageSent', {user: node.params.user}), 'success')
         } catch (error) {
-          NotificationService.notify(`发送消息失败: ${error.message}`, 'error')
+          NotificationService.notify(t('tasks.notification.messageFailure', {error: error.message}), 'error')
         }
       }
     }
@@ -483,18 +483,18 @@ async function publishTask() {
 
     // 如果有移动任务，调用RUN API
     if (locations.length > 0) {
-      NotificationService.notify('任务已发布！', 'info');
+      NotificationService.notify(t('tasks.notification.taskPublished'), 'info');
       const response = await DeviceService.runRobotTask(selectedRobot.value.id, locations);
 
-      NotificationService.notify('任务已执行成功', 'success')
+      NotificationService.notify(t('tasks.notification.taskExecuted'), 'success')
       return response;
     }
 
-    NotificationService.notify('所有任务已处理完成', 'info')
+    NotificationService.notify(t('tasks.notification.allTasksComplete'), 'info')
     return []
   } catch (error) {
     console.error('发布任务失败:', error)
-    NotificationService.notify(`发布任务失败: ${error.message || '未知错误'}`, 'error')
+    NotificationService.notify(t('tasks.notification.publishFailed') + `: ${error.message || t('common.unknown')}`, 'error')
   }
 }
 

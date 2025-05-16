@@ -48,22 +48,22 @@
                   </div>
 
                   <div :class="[statusClasses[robot.status?.status || '未知'], 'rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset']">
-                    {{ robot.status?.status || '未知状态' }}
+                    {{ getStatusTranslation(robot.status?.status || '未知') }}
                   </div>
                 </div>
 
                 <div class="mt-4">
                   <div class="mt-2 flex justify-between border-b py-2">
-                    <div class="text-sm font-medium text-gray-500">在线状态</div>
+                    <div class="text-sm font-medium text-gray-500">{{ $t('robot.detail.onlineStatus') }}</div>
                     <div class="text-sm text-gray-900 flex items-center">
                       <span class="inline-block h-2 w-2 rounded-full mr-2"
                         :class="robot.status?.isOnline ? 'bg-green-400' : 'bg-red-400'" />
-                        {{ robot.status?.isOnline ? '在线' : '离线' }}
+                        {{ robot.status?.isOnline ? $t('robot.detail.online') : $t('robot.detail.offline') }}
                     </div>
                   </div>
 
                   <div class="mt-2 flex justify-between border-b py-2">
-                    <div class="text-sm font-medium text-gray-500">电量</div>
+                    <div class="text-sm font-medium text-gray-500">{{ $t('robot.detail.power') }}</div>
                     <div class="text-sm text-gray-900">
                       <div class="w-24 bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                         <div
@@ -73,38 +73,38 @@
                         ></div>
                       </div>
                       <div class="text-xs mt-1 text-right">
-                        <span v-if="robot.status?.isCharging" class="text-xs text-gray-500">充电中</span>
+                        <span v-if="robot.status?.isCharging" class="text-xs text-gray-500">{{ $t('home.inCharge') }}</span>
                         {{ batteryPercentage }}%
                       </div>
                     </div>
                   </div>
 
                   <div class="mt-2 flex justify-between border-b py-2">
-                    <div class="text-sm font-medium text-gray-500">充电状态</div>
+                    <div class="text-sm font-medium text-gray-500">{{ $t('robot.detail.chargingStatus') }}</div>
                     <div class="text-sm text-gray-900">
                       <div class="text-xs mt-1 text-right">{{ chargingStatusText }}</div>
                     </div>
                   </div>
 
                   <div class="mt-2 flex justify-between border-b py-2">
-                    <div class="text-sm font-medium text-gray-500">货仓ID</div>
-                    <div class="text-sm text-gray-900">{{ robot.cabinId || '未知' }}</div>
+                    <div class="text-sm font-medium text-gray-500">{{ $t('home.warehouseID') }}</div>
+                    <div class="text-sm text-gray-900">{{ robot.cabinId || $t('common.unknown') }}</div>
                   </div>
 
                   <div class="mt-2 flex justify-between border-b py-2">
-                    <div class="text-sm font-medium text-gray-500">位置</div>
-                    <div class="text-sm text-gray-900">{{ robot.status?.location || '未知位置' }}</div>
+                    <div class="text-sm font-medium text-gray-500">{{ $t('robot.detail.location') }}</div>
+                    <div class="text-sm text-gray-900">{{ robot.status?.location || $t('robot.detail.unknownLocation') }}</div>
                   </div>
 
                   <div class="mt-2 flex justify-between border-b py-2">
-                    <div class="text-sm font-medium text-gray-500">最近消息</div>
+                    <div class="text-sm font-medium text-gray-500">{{ $t('robot.detail.lastMessage') }}</div>
                     <div class="text-sm text-gray-900 max-w-xs truncate" :title="robot.status?.message">
-                      {{ robot.status?.message || '无消息' }}
+                      {{ robot.status?.message || $t('robot.detail.noMessage') }}
                     </div>
                   </div>
 
                   <div class="mt-2 flex justify-between py-2">
-                    <div class="text-sm font-medium text-gray-500">最近活动</div>
+                    <div class="text-sm font-medium text-gray-500">{{ $t('robot.detail.lastActivity') }}</div>
                     <div class="text-sm text-gray-900">{{ formatDate(robot.lastActivity) }}</div>
                   </div>
                 </div>
@@ -116,14 +116,14 @@
                   class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   @click="control"
                 >
-                  控制机器人
+                  {{ $t('robot.detail.controlRobot') }}
                 </button>
                 <button
                   type="button"
                   class="inline-flex justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                   @click="closeModal"
                 >
-                  关闭
+                  {{ $t('robot.detail.close') }}
                 </button>
               </div>
             </DialogPanel>
@@ -138,6 +138,9 @@
 import { computed } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { IdentificationIcon } from '@heroicons/vue/24/outline'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   isOpen: Boolean,
@@ -175,9 +178,8 @@ const batteryPercentage = computed(() => {
 })
 
 const chargingStatusText = computed(() => {
-  return props.robot.status.isCharging ? '正在充电' : '未充电'
+  return props.robot.status.isCharging ? t('robot.detail.charging') : t('robot.detail.notCharging')
 })
-console.log(chargingStatusText)
 
 const batteryColorClass = computed(() => {
   if (batteryPercentage.value > 50) return 'bg-green-600'
@@ -194,8 +196,14 @@ function control() {
   closeModal()
 }
 
+function getStatusTranslation(status) {
+  return t(`robot.status.${status === '空闲' ? 'idle' : 
+                            status === '执行任务中' ? 'busy' : 
+                            status === '错误' ? 'error' : 'unknown'}`)
+}
+
 function formatDate(date) {
-  if (!date) return '未知'
+  if (!date) return t('robot.detail.unknownDate')
 
   try {
     const dateObj = new Date(date)
@@ -207,7 +215,7 @@ function formatDate(date) {
       minute: '2-digit'
     }).format(dateObj)
   } catch (e) {
-    return '无效日期'
+    return t('robot.detail.invalidDate')
   }
 }
 
