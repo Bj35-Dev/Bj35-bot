@@ -47,8 +47,8 @@
                     </div>
                   </div>
 
-                  <div :class="[statusClasses[robot.status?.status || '未知'], 'rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset']">
-                    {{ getStatusTranslation(robot.status?.status || '未知') }}
+                  <div :class="[statusClasses[robot.status?.status || 'unknow'], 'rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset']">
+                    {{ getStatusTranslation(robot.status?.status || 'unknow') }}
                   </div>
                 </div>
 

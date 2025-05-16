@@ -7,7 +7,7 @@
     >
       <span class="inline-flex items-center">
         <span class="sr-only">{{ $t('common.switchLanguage') }}</span>
-        <span class="flag-icon">{{ currentLocale === 'en' ? '🇺🇸' : '🇨🇳' }}</span>
+        <span class="flag-icon">{{ getFlagEmoji(currentLocale) }}</span>
         <span class="ml-1">{{ currentLocale.toUpperCase() }}</span>
       </span>
       <svg
@@ -49,6 +49,15 @@
         <span class="flag-icon">🇨🇳</span>
         <span class="ml-2">中文</span>
       </a>
+      <a
+        href="#"
+        class="block px-4 py-2 text-sm hover:bg-gray-100"
+        @click.prevent="changeLanguage('ja')"
+        role="menuitem"
+      >
+        <span class="flag-icon">🇯🇵</span>
+        <span class="ml-2">日本語</span>
+      </a>
     </div>
   </div>
 </template>
@@ -66,6 +75,15 @@ const dropdownButton = ref(null);
 const currentLocale = computed(() => {
   return i18n.locale.value;
 });
+
+const getFlagEmoji = (locale) => {
+  switch(locale) {
+    case 'en': return '🇺🇸';
+    case 'zhcn': return '🇨🇳';
+    case 'ja': return '🇯🇵';
+    default: return '🇺🇸';
+  }
+};
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;

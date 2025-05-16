@@ -58,7 +58,7 @@
               <dt class="text-gray-500">{{ $t('home.taskStatus') }}</dt>
               <dd class="flex items-start gap-x-2">
                 <div class="font-medium text-gray-900">{{ robot.status.message }}</div>
-                <div :class="[statuses[robot.status.status], 'rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset']">{{ robot.status.status }}</div>
+                <div :class="[statuses[robot.status.status], 'rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset']">{{ getStatusTranslation(robot.status?.status || 'unknow') }}</div>
               </dd>
             </div>
             <div class="flex justify-between gap-x-4 py-3">
@@ -140,6 +140,12 @@ function getBatteryColorClass(power) {
   if (power > 50) return 'bg-green-600'
   if (power > 20) return 'bg-yellow-300'
   return 'bg-red-600'
+}
+
+function getStatusTranslation(status) {
+  return t(`robot.status.${status === '空闲' ? 'idle' : 
+                            status === '执行任务中' ? 'busy' : 
+                            status === '错误' ? 'error' : 'unknown'}`)
 }
 
 // 获取设备列表

@@ -1,12 +1,13 @@
 import { createI18n } from 'vue-i18n'
 import en from './locales/en.js'
 import zhcn from './locales/zhcn.js'
+import ja from './locales/ja.js'
 
 // 从浏览器获取首选语言
 const getBrowserLocale = () => {
   const navigatorLocale = navigator.language || navigator.userLanguage || 'en'
   const trimmedLocale = navigatorLocale.trim().split('-')[0]
-  return ['en', 'zh-cn'].includes(trimmedLocale) ? trimmedLocale : 'en'
+  return ['en', 'zh', 'ja'].includes(trimmedLocale) ? trimmedLocale : 'en'
 }
 
 // 从本地存储中获取已保存的语言设置
@@ -22,7 +23,8 @@ const i18n = createI18n({
   globalInjection: true,
   messages: {
     en,
-    zhcn
+    zhcn,
+    ja
   }
 })
 

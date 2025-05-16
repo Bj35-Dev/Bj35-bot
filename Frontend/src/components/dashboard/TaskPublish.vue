@@ -37,7 +37,7 @@
               <p class="text-xs text-gray-500">ID: {{ robot.id.substring(0, 8) }}...</p>
             </div>
             <div class="ml-auto text-xs px-2 py-1 rounded" :class="getStatusClass(robot.status.status)">
-              {{ $t(`robot.status.${robot.status.status}`) }}
+              {{ getStatusTranslation(robot.status?.status || 'unknow') }}
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@
           <div class="flex items-center">
             <span class="px-2 py-1 text-xs rounded"
                   :class="getStatusClass(selectedRobot.status.status)">
-              {{ $t(`robot.status.${selectedRobot.status.status}`) }}
+              {{ getStatusTranslation(selectedRobot.status?.status || 'unknow') }}
             </span>
             <span class="ml-2 text-sm text-gray-500">{{ selectedRobot.status.message }}</span>
           </div>
@@ -358,6 +358,12 @@ const userOptions = ref([
 // 获取状态样式类
 function getStatusClass(status) {
   return statusClasses[status] || statusClasses['未知']
+}
+
+function getStatusTranslation(status) {
+  return t(`robot.status.${status === '空闲' ? 'idle' : 
+                            status === '执行任务中' ? 'busy' : 
+                            status === '错误' ? 'error' : 'unknown'}`)
 }
 
 // 获取电量颜色
