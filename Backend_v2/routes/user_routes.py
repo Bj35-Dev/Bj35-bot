@@ -18,7 +18,7 @@ URI_PREFIX = settings.URI_PREFIX
 def register_routes(app):
     """注册用户信息相关路由"""
 
-    @app.route(URI_PREFIX + '/get_user_profile', methods=['GET'])
+    @app.route(URI_PREFIX + '/user/my', methods=['GET'])
     @jwt_required
     async def get_user_profile():
         # 从JWT中获取用户身份
@@ -40,7 +40,7 @@ def register_routes(app):
         logger.debug("获取到用户信息: %s", info)
         return jsonify(info), 200
 
-    @app.route(URI_PREFIX + '/post_user_profile', methods=['POST'])
+    @app.route(URI_PREFIX + '/user/my', methods=['PATCH'])
     @jwt_required
     async def post_user_profile():
         data = await request.json

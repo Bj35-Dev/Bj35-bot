@@ -296,7 +296,7 @@ onMounted(async () => {
   username.value = AuthService.getUsername()
   
   // 这里可以保持使用统一的 ApiServices 接口
-  useravatar.value = await ApiServices.getUserAvatar()
+  useravatar.value = await ApiServices.getLoginUserAvatar()
   
   window.addEventListener('resize', handleResize)
   await setActiveView(navigation[0])

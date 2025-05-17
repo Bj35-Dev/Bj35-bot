@@ -69,6 +69,16 @@ class ApiPrefix {
     }
   }
 
+  async patch(url, data = {}) {
+    try {
+      const response = await this.api.patch(url, data);
+      return response.data;
+    } catch (error) {
+      this._handleError(error);
+      throw error;
+    }
+  }
+
   async delete(url, params = {}) {
     try {
       const response = await this.api.delete(url, { params });

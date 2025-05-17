@@ -368,7 +368,7 @@ function toggleLanguageEdit() {
 
 const getUserInfo = async () => {
   try {
-    const data = await ApiServices.getUserInfo();
+    const data = await ApiServices.getLoginUserInfo();
     console.log(data);
     profile.value = {
       name: data.name || "None",

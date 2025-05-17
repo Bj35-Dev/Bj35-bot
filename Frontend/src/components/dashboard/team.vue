@@ -145,7 +145,7 @@ const team = [
   {
     name: 'Zhicheng Dong',
     position: 'Full-Stack Developer',
-    description: 'Nothing is impossible with Docker.！',
+    description: 'Nothing is impossible with Docker！',
     image: 'https://cn.cravatar.com/avatar/4ca6db8f5673f5f001c5901fc04b2322ff304b13c9b805576ddf47e310a481dc?s=512',
     github: 'https://github.com/cg8-5712',
     telegram: 'http://cg85712.t.me',

@@ -1,14 +1,13 @@
 import ApiPrefix from '../utils/ApiPrefix';
-import AuthService from './AuthService';
 
 class UserService extends ApiPrefix {
   constructor() {
     super();
   }
 
-  async getUserInfo() {
+  async getLoginUserInfo() {
     try {
-      const info = await this.get('/get_user_profile');
+      const info = await this.get('/user/my');
       console.log(info);
       return info;
     } catch (error) {
@@ -16,20 +15,19 @@ class UserService extends ApiPrefix {
     }
   }
 
-  async getUserAvatar() {
+  async getLoginUserAvatar() {
     try {
-      const userinfo = await this.getUserInfo();
+      const userinfo = await this.getLoginUserInfo();
       const avatar = userinfo.avatar_url;
-      console.log(avatar);
       return avatar;
     } catch (error) {
       throw error;
     }
   }
   
-  async updateUserProfile(data) {
+  async updateLoginUserProfile(data) {
     try {
-      const response = await this.post('/post_user_profile', data);
+      const response = await this.patch('/user/my', data);
       return response;
     } catch (error) {
       throw error;
