@@ -8,8 +8,7 @@ class UserService extends ApiPrefix {
 
   async getUserInfo() {
     try {
-      const user = AuthService.getUserInfo();
-      const info = await this.get('/get_user_profile', { username: user.user_claims.username });
+      const info = await this.get('/get_user_profile');
       console.log(info);
       return info;
     } catch (error) {
@@ -20,7 +19,7 @@ class UserService extends ApiPrefix {
   async getUserAvatar() {
     try {
       const userinfo = await this.getUserInfo();
-      const avatar = userinfo.avatar_text;
+      const avatar = userinfo.avatar_url;
       console.log(avatar);
       return avatar;
     } catch (error) {

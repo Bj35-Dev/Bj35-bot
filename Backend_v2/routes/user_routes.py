@@ -5,7 +5,7 @@ This file contains the routes for user information.
 """
 import logging
 from quart import jsonify, request
-from quart_jwt_extended import jwt_required
+from quart_jwt_extended import jwt_required, get_jwt_identity
 
 from services import UserService
 
@@ -21,10 +21,23 @@ def register_routes(app):
     @app.route(URI_PREFIX + '/get_user_profile', methods=['GET'])
     @jwt_required
     async def get_user_profile():
-        username = request.args.get('username', '')
-        logger.debug("username: %s", username)
-        info = await UserService.get_userinfo_by_username(username, 'name')
-        logger.debug("info: %s", info)
+        # 从JWT中获取用户身份
+        user_id = get_jwt_identity()
+
+        if not user_id:
+            logger.error("用户身份未找到")
+            return jsonify({"error": "用户身份未找到"}), 401
+
+        logger.debug("获取用户信息: user_id=%s", user_id)
+
+        # 使用用户ID从数据库获取完整信息
+        info = await UserService.get_userinfo(user_id)
+
+        if not info:
+            logger.error("未找到用户: uid=%s", user_id)
+            return jsonify({"error": "用户不存在"}), 404
+
+        logger.debug("获取到用户信息: %s", info)
         return jsonify(info), 200
 
     @app.route(URI_PREFIX + '/post_user_profile', methods=['POST'])

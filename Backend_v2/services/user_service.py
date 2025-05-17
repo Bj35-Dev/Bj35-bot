@@ -87,24 +87,43 @@ class UserService:
             logger.error("检查企业微信用户是否存在失败: %s", str(e))
             raise
 
-    # TODO: 移除 kind 参数
     @staticmethod
-    async def get_userinfo_by_username(username: str, kind: str) -> Optional[Dict[str, Any]]:
+    async def get_userinfo(user_id: str, kind = None) -> Optional[Dict[str, Any]]:
         """根据用户名获取用户信息"""
-        allowed_columns = ['username', 'name', 'email', 'mobile', 'wecom_id']
-        if kind not in allowed_columns:
-            logger.error("无效的列名: %s", kind)
-            raise ValueError(f"无效的列名: {kind}")
-
         try:
-            query = f"SELECT * FROM userinfo WHERE {kind} = $1"
-            user_info = await PostgreSQLConnector.fetch_one(query, username)
+            if not kind:
+                kind = 'uid'
+
+            query = f"""SELECT name, email, mobile, wecom_id, department, avatar_url, role
+                    FROM userinfo
+                    WHERE {kind} = $1
+                    LIMIT 1
+                    """
+            user_info = await PostgreSQLConnector.fetch_one(query, user_id)
 
             if user_info:
                 logger.debug("已获取用户信息: %s", user_info)
                 return user_info
 
-            logger.debug("未找到用户: %s", username)
+            logger.debug("未找到用户信息: %s", user_id)
+            return None
+
+        except Exception as e:
+            logger.error("获取用户信息失败: %s", str(e))
+            raise
+
+    @staticmethod
+    async def get_userinfo_by_wecom_id(wecom_id: str) -> Optional[Dict[str, Any]]:
+        """根据企业微信ID获取用户信息"""
+        try:
+            query = "SELECT * FROM userinfo WHERE wecom_id = $1"
+            user_info = await PostgreSQLConnector.fetch_one(query, wecom_id)
+
+            if user_info:
+                logger.debug("已获取用户信息: %s", user_info)
+                return user_info
+
+            logger.debug("未找到用户信息: %s", wecom_id)
             return None
 
         except Exception as e:

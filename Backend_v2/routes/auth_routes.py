@@ -123,7 +123,7 @@ def register_routes(app):
             logger.info("Created new user from WeCom: %s", username)
 
         # 获取用户完整信息用于生成令牌
-        db_user = await UserService.get_userinfo_by_username(wecom_id, 'wecom_id')
+        db_user = await UserService.get_userinfo_by_wecom_id(wecom_id)
 
         if not db_user:
             logger.error("User with WeChat ID %s not found after creation", wecom_id)

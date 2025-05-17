@@ -26,7 +26,7 @@ def register_routes(app):
         username = data.get('username')  # 获取用户名
 
         # 从数据库中获取用户信息
-        user_info = await UserService.get_userinfo_by_username(username, 'name')
+        user_info = await UserService.get_userinfo(username, 'name')
 
         if user_info and 'wecom_id' in user_info:
             user_id = user_info['wecom_id']  # 获取 wecom_id 作为 user_id
