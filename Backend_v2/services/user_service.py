@@ -29,35 +29,31 @@ class UserService:
         注意：此方法会将密码进行哈希处理后存储到数据库中。
         """
         try:
-            wecom = data.get('wecom', 'None')
-            wecom_id = data.get('wecom_id', 0)
-            name = data.get('name', 'None')
+            username = data.get('username')
             password = data.get('password', None)
-
-            ph = PasswordHasher()
 
             if not password:
                 raise ValueError("密码不能为空")
+            password = PasswordHasher().hash(password)
 
-            password = ph.hash(password)
-
+            role = data.get('role', 'user')
+            name = data.get('name', 'None')
+            email = data.get('email', f"{username}@bj35.com")
+            mobile = data.get('mobile', None)
+            wecom_id = data.get('wecom_id', None)
             department = data.get('department', 'None')
-            position = data.get('position', 'B312')
-            mobile = "None"
-            email = data.get('email', f"{wecom_id}@bj35.com")
-            language = data.get('language', 'zh')
-            avatar_text = data.get('avatar', 'None')
+            avatar_url = data.get('avatar_url', None)
 
             await PostgreSQLConnector.execute('''
-                INSERT INTO userinfo (wecom, wecom_id, name, password, department, position, mobile, language, email, avatar_text)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-            ''', wecom, wecom_id, name, password, department, position, mobile, language, email, avatar_text)
+                INSERT INTO userinfo (username, password, role, name, email, mobile, wecom_id, department, avatar_url)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            ''', username, password, role, name, email, mobile, wecom_id, department, avatar_url)
 
             logger.info("用户信息已添加: %s", name)
             return {'success': True}
         except Exception as e:
             logger.error("添加用户失败: %s", str(e))
-            return {'success': False}
+            raise
 
     @staticmethod
     async def verify_user_credentials(username: str, password: str) -> Optional[Dict[str, Any]]:
@@ -66,7 +62,7 @@ class UserService:
             row = await PostgreSQLConnector.fetch_one("""
                 SELECT *
                 FROM userinfo
-                WHERE wecom = $1 OR name = $1 OR email = $1 OR mobile = $1 OR wecom_id = $1
+                WHERE username = $1 OR email = $1 OR mobile = $1 OR wecom_id = $1
                 LIMIT 1
             """, username)
 
@@ -84,31 +80,18 @@ class UserService:
         try:
             result = await PostgreSQLConnector.fetch_val("""
                 SELECT 1 FROM userinfo WHERE wecom_id = $1 LIMIT 1
-            """, int(wecom_id))
+            """, wecom_id)
+
             return bool(result)
         except Exception as e:
             logger.error("检查企业微信用户是否存在失败: %s", str(e))
-            return False
-
-    @staticmethod
-    async def get_password_by_username(username: str, kind: str) -> Optional[str]:
-        """根据用户名获取密码"""
-        allowed_columns = ['wecom', 'name', 'email', 'mobile', 'wecom_id']
-        if kind not in allowed_columns:
-            logger.error("无效的列名: %s", kind)
-            raise ValueError(f"无效的列名: {kind}")
-
-        try:
-            query = f"SELECT password FROM userinfo WHERE {kind} = $1"
-            return await PostgreSQLConnector.fetch_val(query, username)
-        except Exception as e:
-            logger.error("获取密码失败: %s", str(e))
             raise
 
+    # TODO: 移除 kind 参数
     @staticmethod
     async def get_userinfo_by_username(username: str, kind: str) -> Optional[Dict[str, Any]]:
         """根据用户名获取用户信息"""
-        allowed_columns = ['wecom', 'name', 'email', 'mobile', 'wecom_id']
+        allowed_columns = ['username', 'name', 'email', 'mobile', 'wecom_id']
         if kind not in allowed_columns:
             logger.error("无效的列名: %s", kind)
             raise ValueError(f"无效的列名: {kind}")
@@ -119,10 +102,11 @@ class UserService:
 
             if user_info:
                 logger.debug("已获取用户信息: %s", user_info)
-            else:
-                logger.debug("未找到用户: %s", username)
+                return user_info
 
-            return user_info
+            logger.debug("未找到用户: %s", username)
+            return None
+
         except Exception as e:
             logger.error("获取用户信息失败: %s", str(e))
             raise
@@ -131,7 +115,7 @@ class UserService:
     async def update_userinfo(data: Dict[str, Any]) -> Dict[str, bool | str]:
         """更新用户信息"""
         try:
-            name_old = data.get('name_old', '')
+            username = data.get('username', '')
             updates = []
             values = []
             param_index = 1
@@ -144,36 +128,30 @@ class UserService:
                 values.append(hashed_password)
                 param_index += 1
 
+            # 处理其他可能的更新字段
+            for field in ['name', 'email', 'mobile', 'department', 'avatar_url', 'role']:
+                if field in data:
+                    updates.append(f"{field} = ${param_index}")
+                    values.append(data[field])
+                    param_index += 1
+
             # 构建更新SQL
             if not updates:
                 return {'success': True}
 
-            # 修改查询条件，使用 wecom_id
             sql = f"""
                 UPDATE userinfo
                 SET {', '.join(updates)}
-                WHERE wecom_id = ${param_index}
+                WHERE username = ${param_index}
             """
-            values.append(name_old)
+            values.append(username)
 
-            # TODO: 这里应该用 execute() 而不是 fetch_one()
             async with PostgreSQLConnector.transaction():
-                result = await PostgreSQLConnector.fetch_one(sql, *values)
+                await PostgreSQLConnector.execute(sql, *values)
 
-            if result:
-                logger.info("已更新用户信息: %s", {
-                    'name': result.get('name'),
-                    'wecom_id': result.get('wecom_id')
-                })
-                return {'success': True}
-            return {
-                'success': False,
-                'message': '未找到用户'
-            }
+            logger.info("已更新用户信息: %s", username)
+            return {'success': True}
 
         except Exception as e:
             logger.error("更新用户信息失败: %s", str(e))
-            return {
-                'success': False,
-                'message': str(e)
-            }
+            raise
