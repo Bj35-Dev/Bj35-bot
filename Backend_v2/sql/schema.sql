@@ -27,9 +27,14 @@ COMMENT ON COLUMN migrations.description IS '迁移描述';
 
 
 -- 角色类型 - 用于存储用户角色
-CREATE TYPE role_type AS ENUM (
-    'superadmin', 'admin', 'user'
-);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'role_type') THEN
+        CREATE TYPE role_type AS ENUM (
+            'superadmin', 'admin', 'user'
+        );
+    END IF;
+END$$;
 
 -- 用户信息表
 CREATE TABLE IF NOT EXISTS userinfo (
@@ -61,23 +66,34 @@ COMMENT ON COLUMN userinfo.created_at IS '创建时间';
 COMMENT ON COLUMN userinfo.updated_at IS '更新时间';
 
 -- 为 userinfo 表创建更新触发器
-CREATE TRIGGER update_userinfo_modtime
-BEFORE UPDATE ON userinfo
-FOR EACH ROW
-EXECUTE FUNCTION update_modified_column();
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_userinfo_modtime') THEN
+        CREATE TRIGGER update_userinfo_modtime
+        BEFORE UPDATE ON userinfo
+        FOR EACH ROW
+        EXECUTE FUNCTION update_modified_column();
+    END IF;
+END$$;
 
 -- 默认账户
-INSERT INTO userinfo (username, password, role, name, email, mobile, wecom_id, department)
-VALUES (
-    'admin',
-    '$argon2id$v=19$m=65536,t=3,p=4$chpaKFJG+eAWQsohRlqBcw$xfEARKtzemVIlkqM0FjeSUShTuJpgHNW+L6n0pMLkew',
-    'superadmin',
-    '管理员',
-    'admin@example.com',
-    '1234567890',
-    'wecom_id', 
-    'default_department'
-)
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM userinfo WHERE uid = 1) THEN
+        INSERT INTO userinfo (username, password, role, name, email, mobile, wecom_id, department)
+        VALUES (
+            'admin',
+            '$argon2id$v=19$m=65536,t=3,p=4$chpaKFJG+eAWQsohRlqBcw$xfEARKtzemVIlkqM0FjeSUShTuJpgHNW+L6n0pMLkew',
+            'superadmin',
+            '管理员',
+            'test@example.com',
+            '1234567890',
+            'wecom_id', 
+            'default_department'
+        );
+    END IF;
+END$$;
 
 -- 目标位置表 - 存储系统中所有可用的位置信息
 CREATE TABLE IF NOT EXISTS target_locations (
@@ -97,10 +113,15 @@ COMMENT ON COLUMN target_locations.created_at IS '创建时间';
 COMMENT ON COLUMN target_locations.updated_at IS '更新时间';
 
 -- 为 target_locations 表创建更新触发器
-CREATE TRIGGER update_target_locations_modtime
-BEFORE UPDATE ON target_locations
-FOR EACH ROW
-EXECUTE FUNCTION update_modified_column();
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_target_locations_modtime') THEN
+        CREATE TRIGGER update_target_locations_modtime
+        BEFORE UPDATE ON target_locations
+        FOR EACH ROW
+        EXECUTE FUNCTION update_modified_column();
+    END IF;
+END$$;
 
 -- 注: 上面的target_locations表对应settings.py中的TARGET_LIST
 

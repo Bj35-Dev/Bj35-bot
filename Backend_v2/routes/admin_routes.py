@@ -1,5 +1,5 @@
 """
-user_routes.py
+admin_routes.py
 
 This file contains the routes for user information.
 """
