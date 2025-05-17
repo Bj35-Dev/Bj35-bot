@@ -273,7 +273,7 @@ export default {
     title: 'Sign in to your account',
     rememberMe: 'Remember me',
     loginWithAccount: 'Sign in with username',
-    loginWithWecom: 'Sign in with Wecom,
+    loginWithWecom: 'Sign in with Wecom',
     validatingCredentials: 'Validating credentials...',
     wecomLoginSuccess: 'Wecom login successful',
     invalidCredentials: 'Invalid or expired credentials',
