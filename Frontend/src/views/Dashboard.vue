@@ -229,6 +229,7 @@ const navigation = [
   { name: '发布任务', nameKey: 'nav.publish', href: '#', icon: DocumentArrowUpIcon, current: false, componentName: 'TaskPublish'  },
   { name: '任务看板', nameKey: 'nav.tasks', href: '#', icon: ChartBarSquareIcon, current: false, componentName: 'TaskBoard'  },
   { name: '开发团队', nameKey: 'nav.team', href: '#', icon: ChartBarSquareIcon, current: false, componentName: 'Team'  },
+  { name: '管理页面', nameKey: 'nav.admin', href: '#', icon: ChartBarSquareIcon, current: false, componentName: 'admin'  },
 ]
 const userNavigation = [
   { name: '个人资料', nameKey: 'nav.profile', href: '#', componentName: 'Profile' },
@@ -241,6 +242,7 @@ const componentMap = {
   TaskBoard: () => import('../components/dashboard/TaskBoard.vue'),
   Profile: () => import('../components/dashboard/Profile.vue'),
   Team: () => import('../components/dashboard/team.vue'),
+  admin: () => import('../components/dashboard/admin.vue'),
 }
 const activeView = ref(navigation[0])
 
