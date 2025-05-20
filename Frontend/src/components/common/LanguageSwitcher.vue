@@ -40,6 +40,7 @@
         <span class="flag-icon">🇺🇸</span>
         <span class="ml-2">English</span>
       </a>
+
       <a
         href="#"
         class="block px-4 py-2 text-sm hover:bg-gray-100"
@@ -49,6 +50,7 @@
         <span class="flag-icon">🇨🇳</span>
         <span class="ml-2">中文</span>
       </a>
+
       <a
         href="#"
         class="block px-4 py-2 text-sm hover:bg-gray-100"
@@ -57,6 +59,16 @@
       >
         <span class="flag-icon">🇯🇵</span>
         <span class="ml-2">日本語</span>
+      </a>
+
+      <a
+        href="#"
+        class="block px-4 py-2 text-sm hover:bg-gray-100"
+        @click.prevent="changeLanguage('zhtw')"
+        role="menuitem"
+      >
+        <span class="flag-icon">🇹🇼</span>
+        <span class="ml-2">繁體中文</span>
       </a>
     </div>
   </div>
