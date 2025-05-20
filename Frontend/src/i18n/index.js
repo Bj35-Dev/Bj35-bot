@@ -2,12 +2,26 @@ import { createI18n } from 'vue-i18n'
 import en from './locales/en.js'
 import zhcn from './locales/zhcn.js'
 import ja from './locales/ja.js'
+import zhtw from './locales/zhtw.js'
 
 // 从浏览器获取首选语言
 const getBrowserLocale = () => {
   const navigatorLocale = navigator.language || navigator.userLanguage || 'en'
   const trimmedLocale = navigatorLocale.trim().split('-')[0]
-  return ['en', 'zh', 'ja'].includes(trimmedLocale) ? trimmedLocale : 'en'
+  const localeWithRegion = navigatorLocale.trim().split('-')[1] || ''
+
+  if (trimmedLocale === 'zh') {
+    if (localeWithRegion === 'CN') {
+      return 'zhcn'
+    } else if (localeWithRegion === 'TW') {
+      return 'zhtw'
+    } else {
+      // 如果無法確定，默認為簡體中文
+      return 'zhcn'
+    }
+  } else {
+    return ['en', 'zhcn', 'zhtw', 'ja'].includes(navigatorLocale) ? navigatorLocale : 'en'
+  }
 }
 
 // 从本地存储中获取已保存的语言设置
@@ -24,7 +38,8 @@ const i18n = createI18n({
   messages: {
     en,
     zhcn,
-    ja
+    ja,
+    zhtw
   }
 })
 
