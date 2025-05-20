@@ -222,7 +222,6 @@ const navigation = [
   { name: 'General', href: '#', icon: UserCircleIcon, current: true },
   { name: 'Security', href: '#', icon: FingerPrintIcon, current: false, action: goToSecurity },
   { name: 'Notifications', href: '#', icon: BellIcon, current: false },
-  { name: 'Team members', href: '#', icon: UsersIcon, current: false },
   { name: 'Logout', href: '#', icon: XCircleIcon, action: logout },
 ]
 
@@ -369,7 +368,6 @@ function toggleLanguageEdit() {
 const getUserInfo = async () => {
   try {
     const data = await ApiServices.getUserInfo();
-    console.log(data);
     profile.value = {
       name: data.name || "None",
       Email: data.email || "None",

@@ -215,7 +215,7 @@ export default {
     title: 'Profile',
     personalInfo: {
       name: 'Name',
-      emailAddress: 'Email address',
+      emailaddress: 'Email address',
       mobile: 'Mobile',
       department: 'Department',
       wecom: 'Wecom'

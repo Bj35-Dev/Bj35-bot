@@ -215,7 +215,7 @@ export default {
     title: 'プロフィール',
     personalInfo: {
       name: '名前',
-      emailAddress: 'メールアドレス',
+      emailaddress: 'メールアドレス',
       mobile: 'モバイル',
       department: '部門',
       wecom: '企業WeChat'

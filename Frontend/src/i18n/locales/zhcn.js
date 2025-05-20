@@ -215,7 +215,7 @@ export default {
     title: '个人资料',
     personalInfo: {
       name: '姓名',
-      emailAddress: '邮箱地址',
+      emailaddress: '邮箱地址',
       mobile: '手机',
       department: '部门',
       wecom: '企业微信'
