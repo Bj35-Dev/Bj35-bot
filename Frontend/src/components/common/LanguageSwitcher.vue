@@ -93,6 +93,7 @@ const getFlagEmoji = (locale) => {
     case 'en': return '🇺🇸';
     case 'zhcn': return '🇨🇳';
     case 'ja': return '🇯🇵';
+    case 'zhtw': return '🇹🇼';
     default: return '🇺🇸';
   }
 };
