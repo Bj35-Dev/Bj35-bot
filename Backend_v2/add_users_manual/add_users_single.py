@@ -105,7 +105,7 @@ async def add_user(data: Dict[str, Any]) -> Dict[str, bool]:
                     RETURNING uid
                 ''', wecom, wecom_id, name, password, department, position,
                                           mobile, language, email, avatar_text)
-        logger.info("用户信息已添加: %s (uid: %s)", name, wecom_id)
+        logger.info("用户 %s 已添加: %s (uid: %s)", name, name, wecom_id)
         return {'success': True}
     except Exception as e:
         logger.error("添加用户失败: %s", str(e))
