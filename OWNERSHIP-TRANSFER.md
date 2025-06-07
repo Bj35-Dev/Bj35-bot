@@ -41,7 +41,7 @@ The Assignor **may not revoke or reuse** the code under any personal license.
 
 ## 4. Effective Date | 生效日期
 
-This assignment takes effect immediately upon publication or delivery.
+This assignment takes effect on the date specified below.
 
 本转让协议自以下日期起生效：
 
