@@ -59,10 +59,10 @@ logger = logging.getLogger(__name__)
 
 # 数据库配置
 DB_CONFIG = {
-    'host': 'your_postgresql_ip',
+    'host': 'postgresql',
     'port': 5432,
     'user': 'postgres',
-    'password': 'your_postgresql_password',
+    'password': 'yourpassword',
     'database': 'bj35bot',
 }
 
