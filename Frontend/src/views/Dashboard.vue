@@ -241,8 +241,7 @@ const componentMap = {
   TaskPublish: () => import('../components/dashboard/TaskPublish.vue'),
   TaskBoard: () => import('../components/dashboard/TaskBoard.vue'),
   Profile: () => import('../components/dashboard/Profile.vue'),
-  Team: () => import('../components/dashboard/team.vue'),
-  admin: () => import('../components/dashboard/admin.vue'),
+  Team: () => import('../components/dashboard/team.vue')
 }
 const activeView = ref(navigation[0])
 
