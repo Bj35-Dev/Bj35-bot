@@ -293,26 +293,26 @@
   resolved "https://registry.npmmirror.com/@heroicons/vue/-/vue-2.2.0.tgz#d81f14eed448eec9859849ed63facd3f29bca2b3"
   integrity sha512-G3dbSxoeEKqbi/DFalhRxJU4mTXJn7GwZ7ae8NuEQzd1bqdd0jAbdaBZlHPcvPD2xI1iGzNVB4k20Un2AguYPw==
 
-"@intlify/core-base@11.1.5":
-  version "11.1.5"
-  resolved "https://registry.yarnpkg.com/@intlify/core-base/-/core-base-11.1.5.tgz#4ea7c7d89e12283b2046f51f90a4e90fc2fde07d"
-  integrity sha512-xGRkISwV/2Trqb8yVQevlHm5roaQqy+75qwUzEQrviaQF0o4c5VDhjBW7WEGEoKFx09HSgq7NkvK/DAyuerTDg==
+"@intlify/core-base@11.1.8":
+  version "11.1.8"
+  resolved "https://registry.yarnpkg.com/@intlify/core-base/-/core-base-11.1.8.tgz#833c9a7d9c04668302dbf3f5e40bf94dd1cdf1cb"
+  integrity sha512-BAdeGNapg9HL55k2QJPisa6y3FGnIqVK3Yjub2iUEuS88Jf4AY5hD8wm42FW6lEda921S8scWuKkmb6GUWKlqg==
   dependencies:
-    "@intlify/message-compiler" "11.1.5"
-    "@intlify/shared" "11.1.5"
+    "@intlify/message-compiler" "11.1.8"
+    "@intlify/shared" "11.1.8"
 
-"@intlify/message-compiler@11.1.5":
-  version "11.1.5"
-  resolved "https://registry.yarnpkg.com/@intlify/message-compiler/-/message-compiler-11.1.5.tgz#3ce479be964efa5615d11fe08a615e051f4060ec"
-  integrity sha512-YLSBbjD7qUdShe3ZAat9Hnf9E8FRpN6qmNFD/x5Xg5JVXjsks0kJ90Zj6aAuyoppJQA/YJdWZ8/bB7k3dg2TjQ==
+"@intlify/message-compiler@11.1.8":
+  version "11.1.8"
+  resolved "https://registry.yarnpkg.com/@intlify/message-compiler/-/message-compiler-11.1.8.tgz#90b9a1ce4f927b6e9b845775908093152bc79bcb"
+  integrity sha512-4YCeg7L2kt89t6nKSSFACAnTBnBMXu0IfG49+pac2VWkWJ7h9AQcsOD3iCptMGuoEj7hcaoNA4F+K/qA7bJxZw==
   dependencies:
-    "@intlify/shared" "11.1.5"
+    "@intlify/shared" "11.1.8"
     source-map-js "^1.0.2"
 
-"@intlify/shared@11.1.5":
-  version "11.1.5"
-  resolved "https://registry.yarnpkg.com/@intlify/shared/-/shared-11.1.5.tgz#236eb0b2b01876f7b540ddb4079e2027cfc83d63"
-  integrity sha512-+I4vRzHm38VjLr/CAciEPJhGYFzWWW4HMTm+6H3WqknXLh0ozNX9oC8ogMUwTSXYR/wGUb1/lTpNziiCH5MybQ==
+"@intlify/shared@11.1.8":
+  version "11.1.8"
+  resolved "https://registry.yarnpkg.com/@intlify/shared/-/shared-11.1.8.tgz#8baa57e6f5f184e85a825678e13d5fb471fa3a08"
+  integrity sha512-Fpo7YgkT8jwOuSOwOQXrMwqdljEqdfSYdIFkGkpRi80xVCAXpc6MTzuP2pkuQVDXU9MPNC05TWrETzCr+zjuRA==
 
 "@isaacs/fs-minipass@^4.0.0":
   version "4.0.1"
@@ -1193,13 +1193,13 @@ vue-cropperjs@^5.0.0:
   dependencies:
     cropperjs "^1.5.6"
 
-vue-i18n@^11.1.5:
-  version "11.1.5"
-  resolved "https://registry.yarnpkg.com/vue-i18n/-/vue-i18n-11.1.5.tgz#34e8bcd4df709e488b0ff12d500ff0bdb75bec0d"
-  integrity sha512-XCwuaEA5AF97g1frvH/EI1zI9uo1XKTf2/OCFgts7NvUWRsjlgeHPrkJV+a3gpzai2pC4quZ4AnOHFO8QK9hsg==
+vue-i18n@^11.1.8:
+  version "11.1.8"
+  resolved "https://registry.yarnpkg.com/vue-i18n/-/vue-i18n-11.1.8.tgz#f0f8654dc16cfcd3730c019c15f2f28b6a3436e9"
+  integrity sha512-2JHUseyUrjlguX2N72SAKZ4UBDZ2lo22gL2SMQ6jWJh98RB59nUIQNPE9xKKkSgK5cflj9un8SAwfjYg/PHMxw==
   dependencies:
-    "@intlify/core-base" "11.1.5"
-    "@intlify/shared" "11.1.5"
+    "@intlify/core-base" "11.1.8"
+    "@intlify/shared" "11.1.8"
     "@vue/devtools-api" "^6.5.0"
 
 vue-router@4:
